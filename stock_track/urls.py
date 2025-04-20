@@ -3,10 +3,9 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # path('', include('store.urls')),
-    # path('staff/', include('accounts.urls')),
-    # path('transactions/', include('transactions.urls')),
+    path('', include('apps.store.urls')),
     path('accounts/', include('apps.accounts.urls')),
-    # path('invoice/', include('invoice.urls')),
-    # path('bills/', include('bills.urls'))
+    path('transactions/', include('apps.transactions.urls')),
+    path('invoice/', include('apps.invoice.urls')),
+    path('bills/', include('apps.bills.urls'))
 ]

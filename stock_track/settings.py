@@ -36,13 +36,10 @@ INSTALLED_APPS = [
     'django_filters',
     'django_tables2',
     'apps.accounts.apps.AccountsConfig',
-
-
-    # 'store.apps.StoreConfig',
-    # 'accounts.apps.AccountsConfig',
-    # 'transactions.apps.TransactionsConfig',
-    # 'invoice.apps.InvoiceConfig',
-    # 'bills.apps.BillsConfig',
+    'apps.store.apps.StoreConfig',
+    'apps.transactions.apps.TransactionsConfig',
+    'apps.invoice.apps.InvoiceConfig',
+    'apps.bills.apps.BillsConfig',
 ]
 
 MIDDLEWARE = [
