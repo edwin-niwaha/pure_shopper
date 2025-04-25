@@ -1,0 +1,13 @@
+{% extends 'accounts/base.html' %}
+
+{% block title %}
+  Home | StockTrack
+{% endblock %}
+
+{% block content %}
+  <div class="text-center mt-5">
+    <h1 class="display-4" style="color: #127D61;">Welcome to StockTrack</h1>
+    <p class="lead mt-3">Your smart solution for inventory and stock tracking.</p>
+    <a href="{% url 'user-login' %}" class="btn btn-warning mt-4" style="background-color: #F79420;">Get Started</a>
+  </div>
+{% endblock %}

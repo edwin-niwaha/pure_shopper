@@ -21,6 +21,8 @@ from .views import (
     VendorUpdateView,
     VendorDeleteView
 )
+from django.contrib.auth.views import LogoutView
+
 
 urlpatterns = [
     # User authentication URLs
@@ -32,7 +34,6 @@ urlpatterns = [
          name='user-profile-update'),
     path('logout/', auth_views.LogoutView.as_view(
         template_name='accounts/logout.html'), name='user-logout'),
-
     # Profile URLs
     path('profiles/', ProfileListView.as_view(), name='profile_list'),
     path('new-profile/', ProfileCreateView.as_view(), name='profile-create'),

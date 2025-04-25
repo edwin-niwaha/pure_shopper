@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'django_filters',
     'django_tables2',
+    'apps.main.apps.MainConfig',
     'apps.accounts.apps.AccountsConfig',
     'apps.store.apps.StoreConfig',
     'apps.transactions.apps.TransactionsConfig',

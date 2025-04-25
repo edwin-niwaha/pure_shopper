@@ -1,4 +1,5 @@
 # Django core imports
+from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.urls import reverse_lazy, reverse
@@ -32,16 +33,11 @@ from .tables import ProfileTable
 
 
 def register(request):
-    """
-    Handle user registration.
-    If the request is POST, process the form data to create a new user.
-    Redirect to the login page on successful registration.
-    For GET requests, render the registration form.
-    """
     if request.method == 'POST':
         form = CreateUserForm(request.POST)
         if form.is_valid():
             form.save()
+            messages.success(request, 'Registration successful! You can now log in.', extra_tags="bg-success",)
             return redirect('user-login')
     else:
         form = CreateUserForm()
@@ -51,6 +47,7 @@ def register(request):
 
 @login_required
 def profile(request):
+
     """
     Render the user profile page.
     Requires user to be logged in.

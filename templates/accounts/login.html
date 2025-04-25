@@ -1,0 +1,25 @@
+{% extends 'accounts/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+  Login
+{% endblock %}
+
+{% block content %}
+  <!-- Container to center the form and adjust layout -->
+  <div class="container d-flex justify-content-center align-items-center min-vh-100">
+    <div class="form shadow-lg rounded p-4" style="max-width: 500px; width: 100%;">
+      <h2 class="mb-4 text-success fw-bold text-center">Login</h2>
+      <form method="POST">
+        {% csrf_token %}
+        <!-- Use crispy form for form rendering -->
+        {{ form|crispy }}
+        <button type="submit" class="btn btn-success w-100 mt-3">Login</button>
+      </form>
+      <p class="message mt-3 text-center">
+        Not registered?
+        <a href="{% url 'user-register' %}" class="text-decoration-none text-primary fw-semibold">Create an account</a>
+      </p>
+    </div>
+  </div>
+{% endblock %}
