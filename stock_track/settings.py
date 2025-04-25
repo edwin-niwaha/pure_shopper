@@ -122,6 +122,9 @@ LOGIN_URL = 'user-login'
 LOGIN_REDIRECT_URL = 'users-home'
 LOGOUT_URL = 'logout'
 
+SESSION_COOKIE_AGE = 3600  # 60 * 60 seconds = 1 hour
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Close session when browser closes
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 

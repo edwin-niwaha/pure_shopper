@@ -30,10 +30,10 @@
     {% endblock %}
   </head>
   <body>
-    {% include '_partials/navbar.html' %}
+    {% include 'accounts/_partials/navbar.html' %}
 
     <!-- Include message toast section -->
-    {% include '_partials/messages.html' %}
+    {% include 'accounts/_partials/messages.html' %}
 
     <div class="container mt-2 pt-2">
       {% block content %}
@@ -42,7 +42,7 @@
     </div>
 
     <!-- Include Footer -->
-    {% include '_partials/footer.html' %}
+    {% include 'accounts/_partials/footer.html' %}
 
     <!-- MDB Scripts -->
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.6.0/mdb.min.js"></script>
