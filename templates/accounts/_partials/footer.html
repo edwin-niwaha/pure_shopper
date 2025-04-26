@@ -3,24 +3,9 @@
   <div class="container">
     <div class="row">
       <!-- About Section -->
-      <div class="col-md-4 mb-4">
+      <div class="col-md-8 mb-4">
         <h5 class="fw-bold text-primary mb-3">About Us</h5>
-        <p class="text-light">We are dedicated to providing high-quality products and services to our customers. Our mission is to deliver excellence and ensure customer satisfaction at all times.</p>
-      </div>
-      <!-- Quick Links Section -->
-      <div class="col-md-4 mb-4">
-        <h5 class="fw-bold text-primary mb-3">Quick Links</h5>
-        <ul class="list-unstyled">
-          <li>
-            <a href="#" class="text-white text-decoration-none d-block mb-2">About Us</a>
-          </li>
-          <li>
-            <a href="#" class="text-white text-decoration-none d-block mb-2">Services</a>
-          </li>
-          <li>
-            <a href="#" class="text-white text-decoration-none d-block mb-2">Contact</a>
-          </li>
-        </ul>
+        <p class="text-light">At StockTrack, we simplify inventory and sales management for businesses of all sizes. Our platform helps you track stock levels, monitor sales trends, and make smarter decisions with ease. Designed for simplicity and efficiency, StockTrack empowers you to manage your products and grow your business effortlessly. Join us and take control of your inventory today!</p>
       </div>
       <!-- Contact Section -->
       <div class="col-md-4 mb-4">
@@ -42,8 +27,11 @@
     <hr class="my-4" style="border-color: #444;" />
     <div class="text-center">
       <p class="mb-0 text-light">
-        &copy; 2025 <span class="text-primary"><a href="https://perpetual-web-vert.vercel.app/" class="text-decoration-none text-primary">Perpetual Tech</a></span>. All Rights Reserved.
+        &copy; <span id="current-year"></span> <span class="text-primary"><a target="_blank" href="https://perpetual-web-vert.vercel.app/" class="text-decoration-none text-primary">Perpetual Tech</a></span> | All Rights Reserved
       </p>
     </div>
   </div>
+  <script>
+    document.getElementById('current-year').textContent = new Date().getFullYear()
+  </script>
 </footer>

@@ -1,6 +1,10 @@
 <nav class="navbar navbar-expand-lg bg-dark navbar-dark fixed-top">
   <div class="container-fluid">
-    <a class="navbar-brand" href="{% url 'users-home' %}" style="color: #F79420; font-weight: bold;"><i class="fas fa-chart-line me-2"></i>StockTrack</a>
+    <a class="navbar-brand fw-bold" href="{% url 'users-home' %}">
+      <i class="fas fa-chart-line me-2"></i>
+      <span style="color: #127D61;">Stock</span><span style="color: #F79420;">Track</span>
+    </a>
+
     <button class="navbar-toggler" type="button" data-mdb-toggle="collapse" data-mdb-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"><i class="fas fa-bars"></i></button>
 
     <div class="collapse navbar-collapse" id="navbarNav">
@@ -18,8 +22,12 @@
           <li class="nav-item">
             <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
           </li>
+          <!-- Logout with POST method -->
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'user-logout' %}">Logout</a>
+            <form method="POST" action="{% url 'user-logout' %}" style="display: inline;">
+              {% csrf_token %}
+              <button type="submit" class="nav-link btn btn-link">Logout</button>
+            </form>
           </li>
         {% else %}
           <li class="nav-item">

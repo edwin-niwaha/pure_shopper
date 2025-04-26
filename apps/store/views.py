@@ -1,7 +1,7 @@
 # Standard library imports
 import operator
 from functools import reduce
-
+from django.contrib import messages
 # Django core imports
 from django.shortcuts import render
 from django.urls import reverse, reverse_lazy
@@ -81,16 +81,6 @@ def dashboard(request):
 
 
 class ProductListView(LoginRequiredMixin, ExportMixin, tables.SingleTableView):
-    """
-    View class to display a list of products.
-
-    Attributes:
-    - model: The model associated with the view.
-    - table_class: The table class used for rendering.
-    - template_name: The HTML template used for rendering the view.
-    - context_object_name: The variable name for the context object.
-    - paginate_by: Number of items per page for pagination.
-    """
 
     model = Item
     table_class = ItemTable
@@ -101,12 +91,6 @@ class ProductListView(LoginRequiredMixin, ExportMixin, tables.SingleTableView):
 
 
 class ItemSearchListView(ProductListView):
-    """
-    View class to search and display a filtered list of items.
-
-    Attributes:
-    - paginate_by: Number of items per page for pagination.
-    """
 
     paginate_by = 10
 
@@ -125,13 +109,6 @@ class ItemSearchListView(ProductListView):
 
 
 class ProductDetailView(LoginRequiredMixin, FormMixin, DetailView):
-    """
-    View class to display detailed information about a product.
-
-    Attributes:
-    - model: The model associated with the view.
-    - template_name: The HTML template used for rendering the view.
-    """
 
     model = Item
     template_name = "store/productdetail.html"
@@ -141,23 +118,13 @@ class ProductDetailView(LoginRequiredMixin, FormMixin, DetailView):
 
 
 class ProductCreateView(LoginRequiredMixin, CreateView):
-    """
-    View class to create a new product.
-
-    Attributes:
-    - model: The model associated with the view.
-    - template_name: The HTML template used for rendering the view.
-    - form_class: The form class used for data input.
-    - success_url: The URL to redirect to upon successful form submission.
-    """
 
     model = Item
     template_name = "store/productcreate.html"
     form_class = ItemForm
-    success_url = "/products"
+    success_url = reverse_lazy('productslist')
 
     def test_func(self):
-        # item = Item.objects.get(id=pk)
         if self.request.POST.get("quantity") < 1:
             return False
         else:
@@ -165,15 +132,6 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
 
 
 class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
-    """
-    View class to update product information.
-
-    Attributes:
-    - model: The model associated with the view.
-    - template_name: The HTML template used for rendering the view.
-    - fields: The fields to be updated.
-    - success_url: The URL to redirect to upon successful form submission.
-    """
 
     model = Item
     template_name = "store/productupdate.html"
@@ -188,14 +146,6 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
 
 class ProductDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
-    """
-    View class to delete a product.
-
-    Attributes:
-    - model: The model associated with the view.
-    - template_name: The HTML template used for rendering the view.
-    - success_url: The URL to redirect to upon successful deletion.
-    """
 
     model = Item
     template_name = "store/productdelete.html"
@@ -211,15 +161,6 @@ class ProductDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 class DeliveryListView(
     LoginRequiredMixin, ExportMixin, tables.SingleTableView
 ):
-    """
-    View class to display a list of deliveries.
-
-    Attributes:
-    - model: The model associated with the view.
-    - pagination: Number of items per page for pagination.
-    - template_name: The HTML template used for rendering the view.
-    - context_object_name: The variable name for the context object.
-    """
 
     model = Delivery
     pagination = 10
@@ -228,12 +169,6 @@ class DeliveryListView(
 
 
 class DeliverySearchListView(DeliveryListView):
-    """
-    View class to search and display a filtered list of deliveries.
-
-    Attributes:
-    - paginate_by: Number of items per page for pagination.
-    """
 
     paginate_by = 10
 
@@ -253,28 +188,12 @@ class DeliverySearchListView(DeliveryListView):
 
 
 class DeliveryDetailView(LoginRequiredMixin, DetailView):
-    """
-    View class to display detailed information about a delivery.
-
-    Attributes:
-    - model: The model associated with the view.
-    - template_name: The HTML template used for rendering the view.
-    """
 
     model = Delivery
     template_name = "store/deliverydetail.html"
 
 
 class DeliveryCreateView(LoginRequiredMixin, CreateView):
-    """
-    View class to create a new delivery.
-
-    Attributes:
-    - model: The model associated with the view.
-    - fields: The fields to be included in the form.
-    - template_name: The HTML template used for rendering the view.
-    - success_url: The URL to redirect to upon successful form submission.
-    """
 
     model = Delivery
     form_class = DeliveryForm
@@ -283,15 +202,7 @@ class DeliveryCreateView(LoginRequiredMixin, CreateView):
 
 
 class DeliveryUpdateView(LoginRequiredMixin, UpdateView):
-    """
-    View class to update delivery information.
 
-    Attributes:
-    - model: The model associated with the view.
-    - fields: The fields to be updated.
-    - template_name: The HTML template used for rendering the view.
-    - success_url: The URL to redirect to upon successful form submission.
-    """
 
     model = Delivery
     form_class = DeliveryForm
@@ -300,14 +211,6 @@ class DeliveryUpdateView(LoginRequiredMixin, UpdateView):
 
 
 class DeliveryDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
-    """
-    View class to delete a delivery.
-
-    Attributes:
-    - model: The model associated with the view.
-    - template_name: The HTML template used for rendering the view.
-    - success_url: The URL to redirect to upon successful deletion.
-    """
 
     model = Delivery
     template_name = "store/productdelete.html"

@@ -1,14 +1,27 @@
 {% extends 'accounts/base.html' %}
+{% load static %}
 
 {% block title %}
   Home | StockTrack
 {% endblock %}
 
 {% block content %}
-  <div class="text-center mt-5 mb-5">
-    <!-- Added mb-5 here for margin-bottom -->
-    <h1 class="display-4" style="color: #127D61;">Welcome to StockTrack</h1>
-    <p class="lead mt-3">Your smart solution for inventory and stock tracking.</p>
-    <a href="{% url 'user-login' %}" class="btn btn-warning mt-4" style="background-color: #F79420;">Get Started</a>
+  <div class="container d-flex flex-column flex-md-row align-items-center justify-content-center text-center text-md-start px-4 pt-5 pb-5 gap-5">
+    <!-- Text Section -->
+    <div>
+      <h1 class="display-5 fw-bold mb-3"><span style="color: #127D61;">Stock</span><span style="color: #F79420;">Track</span></h1>
+      <p class="lead mb-4" style="max-width: 480px;">Smarter Inventory & Sales Management</p>
+      <hr />
+      {% if user.is_authenticated %}
+        Welcome, <span class="text-success">{{ user.username }}</span>!
+      {% else %}
+        <a href="{% url 'user-login' %}" class="btn btn-lg px-5 py-2" style="background-color: #F79420; color: #fff; border: none; border-radius: 8px;">Get Started</a>
+      {% endif %}
+    </div>
+
+    <!-- Image Section -->
+    <div class="flex-shrink-0">
+      <img src="{% static 'images/sales.jpeg' %}" alt="Inventory Icon" class="img-fluid" style="max-width: 400px; height: auto;" />
+    </div>
   </div>
 {% endblock %}
