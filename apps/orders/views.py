@@ -736,7 +736,7 @@ def orders_to_be_processed_view(request):
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
-    table_title = "Orders to be Processed"
+    table_title = "Sales Orders to be Processed"
 
     return render(
         request,
