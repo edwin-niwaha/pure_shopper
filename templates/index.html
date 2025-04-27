@@ -1,5 +1,6 @@
 {% extends 'accounts/base.html' %}
 {% load static %}
+{% load humanize %}
 
 {% block title %}
   Home | StockTrack
@@ -15,7 +16,7 @@
       {% if user.is_authenticated %}
         Welcome, <span class="text-success">{{ user.username }}</span>!
       {% else %}
-        <a href="{% url 'user-login' %}" class="btn btn-lg px-5 py-2" style="background-color: #F79420; color: #fff; border: none; border-radius: 8px;">Get Started</a>
+        <a href="{% url 'login' %}" class="btn btn-lg px-5 py-2" style="background-color: #F79420; color: #fff; border: none; border-radius: 8px;">Get Started</a>
       {% endif %}
     </div>
 

@@ -2,52 +2,141 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <link rel="shortcut icon" href="{% static 'images/file.png' %}" />
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous" />
+
+    <!-- Add custom stylesheets -->
+    <link href="{% static 'css/footer.css' %}" rel="stylesheet" type="text/css" />
+    <link href="{% static 'css/users.css' %}" rel="stylesheet" type="text/css" />
+    <link href="{% static 'css/carousel.css' %}" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="{% static 'css/product_hoover.css' %}" />
+
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
+
+    <!-- Material Design Icons -->
+    <link rel="stylesheet" href="https://cdn.materialdesignicons.com/6.5.95/css/materialdesignicons.min.css" />
+
+    <!-- Font Awesome icons -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous" />
+
     <title>
       {% block title %}
         StockTrack
       {% endblock %}
     </title>
 
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
-
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet" />
-
-    <!-- MDB UI Kit -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.6.0/mdb.min.css" rel="stylesheet" />
-
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="{% static 'css/style_accounts.css' %}" />
-
-    <!-- Bootstrap 5 CSS (in head section) -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
-
-    {% block extra_head %}
-
-    {% endblock %}
+    <style>
+      .fixed-marquee {
+        position: fixed;
+        top: 56px; /* Height of the navbar */
+        width: 100%;
+        z-index: 1029; /* Below the navbar but above the content */
+      }
+      
+      body {
+        padding-top: 96px; /* Adjust padding to account for navbar + marquee */
+      }
+      .product-item .carousel-item img {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+      
+      .product-item .carousel-item:hover img {
+        transform: scale(1.1);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      }
+      .product-image {
+        border-radius: 15px; /* Apply rounded corners to images */
+      }
+      .footer-item {
+        font-family: 'Times New Roman', serif;
+        color: whitesmoke;
+        text-decoration: none;
+      }
+    </style>
   </head>
+
   <body>
-    {% include 'accounts/_partials/navbar.html' %}
+    <!-- ========== Topbar Start ========== -->
+    {% block topbar %}
+      {% include 'accounts/_partials/navbar.html' %}
+    {% endblock %}
+    <!-- ========== Topbar End ========== -->
 
-    <!-- Include message toast section -->
-    {% include 'accounts/_partials/messages.html' %}
+    <!-- =============== Messages Start ================= -->
+    {% block messages %}
+      {% include '_partials/messages.html' %}
+    {% endblock %}
+    <!-- =============== Messages End ================= -->
+    {% comment %} {% include '_partials/cookies.html' %} {% endcomment %}
 
-    <div class="container mt-2 pt-2">
+    <!-- Content -->
+    <div class="container-fluid">
       {% block content %}
 
       {% endblock %}
     </div>
 
-    <!-- Include Footer -->
-    {% include 'accounts/_partials/footer.html' %}
+    <!-- ============== Footer ===================== -->
+    {% block footer %}
+      {% include '_partials/home_footer.html' %}
+      <!-- Chat Button -->
+      <button id="load-chat" style="position: fixed; bottom: 20px; right: 20px; padding: 12px 18px; background-color: #007bff; color: white; border: none; border-radius: 6px; z-index: 10000; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">💬 Chat with us</button>
+    {% endblock %}
+    <!-- ============================================= -->
 
-    <!-- MDB Scripts -->
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.6.0/mdb.min.js"></script>
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
-    <!-- Bootstrap 5 JS (at the end of body) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- A plugin for password show/hide -->
+    <script src="https://unpkg.com/bootstrap-show-password@1.2.1/dist/bootstrap-show-password.min.js"></script>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Additional scripts -->
+    {% block scripts %}
+      <script src="{% static 'assets/vendors/js/vendor.bundle.base.js' %}"></script>
+
+      <!-- disabled btn -->
+      <script type="text/javascript" src="{% static 'js/disabled_btn.js' %}"></script>
+      <script src="{% static 'js/search.js' %}"></script>
+      <script src="{% static 'js/print.js' %}"></script>
+      <!-- JavaScript for Quantity Control -->
+      <script src="{% static 'js/cart.js' %}"></script>
+      <!-- Custom JS -->
+
+      {% comment %} <script src="{% static 'js/cookies.js' %}"></script> {% endcomment %}
+    {% endblock %}
+
+    <!-- Start of Tawk.to Script -->
+    <script>
+      document.getElementById('load-chat').addEventListener('click', function () {
+        if (!window.Tawk_API) {
+          window.Tawk_API = {}
+          window.Tawk_LoadStart = new Date()
+      
+          var s1 = document.createElement('script')
+          s1.async = true
+          s1.src = 'https://embed.tawk.to/67be2a6557476c190f8fff7a/1ikvdb7ot'
+          s1.charset = 'UTF-8'
+          s1.setAttribute('crossorigin', '*')
+      
+          var s0 = document.getElementsByTagName('script')[0]
+          s0.parentNode.insertBefore(s1, s0)
+        }
+      })
+    </script>
+
+    <!-- End of Tawk.to Script -->
   </body>
 </html>

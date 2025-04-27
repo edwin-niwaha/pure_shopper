@@ -1,0 +1,55 @@
+{% load static %}
+<!-- Site footer -->
+<footer class="site-footer">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-sm-12 col-md-9">
+        <h6>About</h6>
+        <hr />
+        <p class="text-justify">At StockTrack, we simplify inventory and sales management for businesses of all sizes. Our platform helps you track stock levels, monitor sales trends, and make smarter decisions with ease. Designed for simplicity and efficiency, StockTrack empowers you to manage your products and grow your business effortlessly. Join us and take control of your inventory today!</p>
+      </div>
+
+      <div class="col-xs-6 col-md-3">
+        <h6>Quick Links</h6>
+        <hr />
+        <ul class="footer-links">
+          <li>
+            <a class="footer-item" href="{% url 'about_us' %}">About Us</a>
+          </li>
+          <li>
+            <a class="footer-item" href="{% url 'contact_us' %}">Contact Us</a>
+          </li>
+          <li>
+            <a class="footer-item" href="{% url 'privacy_policy' %}">Privacy Policy</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <hr />
+  </div>
+
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-8 col-sm-6 col-xs-12">
+        <p class="copyright-text">
+          Copyright &copy; <span id="year"></span> | All Rights Reserved by Perpetual Tech | Crafted by
+          <a target="_blank" href="https://perpetual-web-vert.vercel.app/" class="creator-link" style="font-family: 'Brush Script MT', cursive; color: #f0f8ff; text-decoration: none; font-size: 18px; padding: 5px 10px; background-color: #4a90e2; border-radius: 5px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); transition: background-color 0.3s;">Perpetual Tech</a>
+        </p>
+        <script>
+          // Automatically display the current year
+          document.getElementById('year').textContent = new Date().getFullYear()
+        </script>
+      </div>
+
+      <div class="col-md-4 col-sm-6 col-xs-12">
+        <a target="_blank" class="m-1 btn btn-primary btn-floating" style="background-color: #3b5998" href="https://wa.me/256703163074" role="button"><i class="fab fa-whatsapp"></i></a>
+        <!-- Instagram -->
+        <a target="_blank" class="m-1 btn btn-primary btn-floating" style="background-color: #ac2bac" href="https://instagram.com/niwaha_edwin" role="button"><i class="fab fa-instagram"></i></a>
+
+        <!-- Linkedin -->
+        <a target="_blank" class="m-1 btn btn-primary btn-floating" style="background-color: #0082ca" href="https://www.linkedin.com/in/edwin-niwaha-155089100/" role="button"><i class="fab fa-linkedin-in"></i></a>
+      </div>
+    </div>
+  </div>
+</footer>
+<!-- end Footer -->

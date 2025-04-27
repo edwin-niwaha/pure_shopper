@@ -1,22 +1,26 @@
 {% extends 'accounts/base.html' %}
 {% load static %}
 
-{% block title %}
-  Logged Out - StockTrack
-{% endblock %}
-
 {% block content %}
-  <div class="container d-flex flex-column justify-content-center align-items-center text-center py-5">
-    <h1 class="display-5 fw-bold mb-3 text-success">You have logged out</h1>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-6 m-auto">
+        <div class="p-4">
+          <img src="{% static 'images/file.png' %}" class="img-fluid mx-auto" alt="Background Image" />
+        </div>
+      </div>
+      <div class="col-md-6 m-auto">
+        <hr />
+        <!-- Logout Message Section -->
+        <h2 class="text-success">You have been successfully logged out</h2>
+        <p class="lead">Thank you for visiting. We hope to see you again soon!</p>
 
-    <div class="alert alert-info mb-4" role="alert">
-      <h2 class="h4 mb-0">See you soon!</h2>
+        <!-- Redirect or Login Link -->
+        <div class="mt-4">
+          <a href="{% url 'login' %}" class="btn w-100 text-white" style="background-color: #F79420; border-color: #b88a4b;">Login Again</a>
+        </div>
+        <hr />
+      </div>
     </div>
-
-    {% if user.is_authenticated %}
-      <p class="mb-4">Welcome, {{ user.username }}!</p>
-    {% else %}
-      <a href="{% url 'user-login' %}" class="btn btn-lg px-5 py-2 text-white" style="background-color: #F79420; border-radius: 8px;">Login</a>
-    {% endif %}
   </div>
 {% endblock %}

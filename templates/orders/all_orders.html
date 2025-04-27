@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
+            <a href="{% url 'orders:orders_to_be_processed' %}" class="btn btn-info font-weight-bold">
+                <i class="mdi mdi-arrow-left-bold mr-2"></i>
+                Go back
+            </a>
+
+            <form method="get" class="ml-auto">
+                <select name="status" class="form-control" onchange="this.form.submit()">
+                    <option value="" {% if status_filter == "" %}selected{% endif %}>-- Select Status --</option>
+                    <option value="All" {% if status_filter == "All" %}selected{% endif %}>All Orders</option>
+                    <option value="Pending" {% if status_filter == "Pending" %}selected{% endif %}>Pending</option>
+                    <option value="Out for Delivery" {% if status_filter == "Out for Delivery" %}selected{% endif %}>Out for Delivery</option>
+                    <option value="Delivered" {% if status_filter == "Delivered" %}selected{% endif %}>Delivered
+                    </option>
+                    <option value="Canceled" {% if status_filter == "Canceled" %}selected{% endif %}>Canceled</option>
+                    <option value="Refunded" {% if status_filter == "Refunded" %}selected{% endif %}>Refunded</option>
+                    <option value="Returned" {% if status_filter == "Returned" %}selected{% endif %}>Returned</option>
+                </select>
+            </form>
+        </div>
+    <!-- Search Form -->
+    <form method="get" action="{% url 'orders:all_orders' %}" class="mb-3">
+      <div class="input-group">
+        <input type="text" name="search" value="{{ search_query }}" class="form-control" placeholder="Search orders" />
+        <button class="btn btn-primary" type="submit"><i class="mdi mdi-search"></i> Search</button>
+      </div>
+    </form>
+        <div class="card-body">
+            {% if orders %}
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Customer</th>
+                            <th>Date</th>
+                            <th>Total Amount</th>
+                            <th>Status</th>
+                            <th colspan="2" class="print-hide">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                        <tr>
+                            <td>{{ order.id }}</td>
+                            <td>{{ order.customer.get_full_name }}</td>
+                            <td>{{ order.created_at|date:"d M Y, H:i A" }}</td>
+                            <td class="text-right">{{ order.total_amount|floatformat:"2"|intcomma }}</td>
+                            <td>
+                                {% if order.status == 'Pending' %}
+                                  <span class="badge bg-warning">Pending</span>
+                                {% elif order.status == 'Out for Delivery' %}
+                                  <span class="badge bg-info text-dark">Out for Delivery</span>
+                                {% elif order.status == 'Delivered' %}
+                                  <span class="badge bg-success">Delivered</span>
+                                {% elif order.status == 'Canceled' %}
+                                  <span class="badge bg-danger">Canceled</span>
+                                {% elif order.status == 'Refunded' %}
+                                  <span class="badge bg-secondary">Refunded</span>
+                                {% elif order.status == 'Returned' %}
+                                  <span class="badge bg-dark">Returned</span>
+                                {% else %}
+                                  <span class="badge bg-light text-dark">Unknown</span>
+                                {% endif %}
+                              </td>
+                            <td class="print-hide">
+                                <a href="{% url 'orders:order_report' order.id %}" class="btn btn-sm btn-primary">
+                                    View Details
+                                </a>
+                            </td>
+                            <td class="print-hide">
+                                {% if user.profile.role == 'administrator' or user.profile.role == 'manager' %}
+                                  <!-- Delete button and modal -->
+                                  <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ order.id }}" title="Delete Order"><i class="mdi mdi-delete-outline"></i></button>
+          
+                                  <!-- Delete Modal -->
+                                  <div class="modal fade" id="deleteModal{{ order.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ order.id }}" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                      <div class="modal-content">
+                                        <div class="modal-header">
+                                          <h5 class="modal-title" id="deleteModalLabel{{ order.id }}">Delete Order</h5>
+                                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">X</button>
+                                        </div>
+                                        <div class="modal-body">
+                                          Are you sure you want to delete the order: <strong>{{ order.id }}</strong>?
+                                        </div>
+                                        <div class="modal-footer">
+                                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                          <a href="{% url 'orders:delete_order' order.id %}" class="text-decoration-none"><button type="button" class="btn btn-danger">Delete</button></a>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                {% endif %}
+                              </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center">No orders found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                            <!-- Pagination -->
+            <div class="d-flex justify-content-between">
+              <div>
+                {% if orders.has_previous %}
+                  <a href="?page=1&search={{ search_query }}" class="btn btn-link">First</a>
+                  <a href="?page={{ orders.previous_page_number }}&search={{ search_query }}" class="btn btn-link">Previous</a>
+                {% endif %}
+                <span>Page {{ orders.number }} of {{ orders.paginator.num_pages }}</span>
+                {% if orders.has_next %}
+                  <a href="?page={{ orders.next_page_number }}&search={{ search_query }}" class="btn btn-link">Next</a>
+                  <a href="?page={{ orders.paginator.num_pages }}&search={{ search_query }}" class="btn btn-link">Last</a>
+                {% endif %}
+              </div>
+            </div>
+            </div>
+            {% else %}
+            <p class="text-center">No orders available at the moment.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
