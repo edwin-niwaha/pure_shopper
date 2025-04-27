@@ -31,24 +31,6 @@
                 <!-- Read More Section -->
                 <div>
                   <button class="btn btn-outline-secondary btn-sm w-100 mb-2" type="button" data-bs-toggle="collapse" data-bs-target="#details-{{ product.id }}" aria-expanded="false" aria-controls="details-{{ product.id }}">Read More</button>
-                  <div class="collapse" id="details-{{ product.id }}">
-                    {% for volume in product.discounted_volumes %}
-                      <div class="bg-light p-2 rounded mb-2">
-                        <p class="mb-1">
-                          <span class="badge bg-primary">Volume: {{ volume.volume.ml }}ML</span>
-                        </p>
-                        <p class="mb-1 text-muted">
-                          Original Price:<del>UgX{{ volume.volume.price|floatformat:'2'|intcomma }}</del>
-                        </p>
-                        <p class="mb-1">
-                          <span class="text-success font-weight-bold">Discounted Price: UgX{{ volume.get_discounted_price|floatformat:'2'|intcomma }}</span>
-                        </p>
-                        <p>
-                          <span class="badge bg-danger">Discount: {{ volume.discount_value }}%</span>
-                        </p>
-                      </div>
-                    {% endfor %}
-                  </div>
                 </div>
 
                 <!-- Action Buttons -->

@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 from django.contrib.auth.models import User
 from django.forms import model_to_dict
@@ -21,13 +22,6 @@ STATUS_CHOICES = [
     ("INACTIVE", "Inactive"),
 ]
 
-# Define choices for gender
-GENDER_CHOICES = [
-    ("", "-- Choose gender --"),
-    ("Unisex", "Unisex"),
-    ("Male", "Male"),
-    ("Female", "Female"),
-]
 
 # Define choices for product type
 PRODUCT_TYPE_CHOICES = [
@@ -55,39 +49,104 @@ class Category(models.Model):
         return self.name
 
 
-class Volume(models.Model):
-    ml = models.IntegerField(unique=True, verbose_name="Volume in ML")
-    cost = models.DecimalField(
-        max_digits=10, decimal_places=2, verbose_name="Cost Price"
-    )
-    price = models.DecimalField(
-        max_digits=10, decimal_places=2, verbose_name="Selling Price"
-    )
-    image = CloudinaryField("image", blank=True, null=True)
+# class Product(models.Model):
+#     name = models.CharField(max_length=256, verbose_name="Product Name")
+#     description = models.TextField(verbose_name="Product Description")
+#     status = models.CharField(
+#         choices=STATUS_CHOICES, max_length=10, verbose_name="Status"
+#     )
+#     category = models.ForeignKey(
+#         Category,
+#         related_name="products",
+#         on_delete=models.SET_NULL,
+#         null=True,
+#         blank=True,
+#         verbose_name="Category",
+#     )
+#     quantity = models.IntegerField(default=0)
+#     cost = models.DecimalField(
+#         max_digits=10, decimal_places=2, verbose_name="Cost Price"
+#     )
+#     price = models.DecimalField(
+#         max_digits=10, decimal_places=2, verbose_name="Selling Price"
+#     )
+#     supplier = models.ForeignKey(
+#         Supplier,
+#         related_name="products",
+#         on_delete=models.SET_NULL,
+#         null=True,
+#         blank=True,
+#         verbose_name="Supplier",
+#     )
+#     discount_value = models.DecimalField(
+#         max_digits=10,
+#         decimal_places=2,
+#         null=True,
+#         blank=True,
+#         verbose_name="Discount Value",
+#     )
+#     is_featured = models.BooleanField(default=False, verbose_name="Is Featured")
+#     expiring_date = models.DateTimeField(null=True, blank=True)
+#     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created At")
+#     updated_at = models.DateTimeField(auto_now=True, verbose_name="Updated At")
 
-    class Meta:
-        db_table = "volume_details"
-        ordering = ["ml"]  # Sort by volume in ascending order
-        verbose_name = "Volume"
-        verbose_name_plural = "Volumes"
+#     class Meta:
+#         db_table = "product"
 
-    def save(self, *args, **kwargs):
-        if self.image and not str(self.image).startswith("http"):
-            upload_result = cloudinary.uploader.upload(
-                self.image.file, folder="product_volume_images"
-            )
-            self.image = upload_result["url"]
-        super().save(*args, **kwargs)
+#     def __str__(self):
+#         return f"{self.name}: (Cost: {self.cost}, Price: {self.price})"
 
-    def __str__(self):
-        return f"{self.ml} ML (Cost: {self.cost}, Price: {self.price})"
+
+#     def to_json(self):
+#         item = model_to_dict(self)
+#         item.update(
+#             {
+#                 "id": self.id,
+#                 "text": self.name,
+#                 "category": self.category.name if self.category else None,
+#                 "quantity": (
+#                     self.inventory.quantity if hasattr(self, "inventory") else 0
+#                 ),
+#                 "total_product": 0,
+#             }
+#         )
+#         return item
+
+#     def apply_discount(self):
+#         """Apply the percentage discount to the price of the product."""
+#         if self.discount_value:  # Assume all discounts are percentages
+#             self.price -= self.price * self.discount_value / 100
+
+#             # Ensure the price doesn't go below zero
+#             self.price = max(0, self.price)
+#             self.save()
+
+#     def get_discounted_price(self):
+#         """Get the discounted price with a percentage discount applied."""
+#         discounted_price = self.price
+#         if self.discount_value:  # Assume all discounts are percentages
+#             discounted_price -= self.price * self.discount_value / 100
+
+#         return max(0, discounted_price)
+    
+#     @property
+#     def prefixed_id(self):
+#         return f"SKU{self.pk:03d}"
 
 
 class Product(models.Model):
-    name = models.CharField(max_length=256, verbose_name="Product Name")
-    description = models.TextField(verbose_name="Product Description")
+    name = models.CharField(
+        max_length=256,
+        verbose_name="Product Name"
+    )
+    sku = models.CharField(max_length=100, unique=True, verbose_name="SKU", blank=True)
+    description = models.TextField(
+        verbose_name="Product Description"
+    )
     status = models.CharField(
-        choices=STATUS_CHOICES, max_length=10, verbose_name="Status"
+        max_length=10,
+        choices=STATUS_CHOICES,
+        verbose_name="Status"
     )
     category = models.ForeignKey(
         Category,
@@ -95,10 +154,7 @@ class Product(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        verbose_name="Category",
-    )
-    volumes = models.ManyToManyField(
-        Volume, through="ProductVolume", related_name="products"
+        verbose_name="Category"
     )
     supplier = models.ForeignKey(
         Supplier,
@@ -106,23 +162,55 @@ class Product(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        verbose_name="Supplier",
+        verbose_name="Supplier"
     )
-    gender = models.CharField(
-        choices=GENDER_CHOICES,
-        max_length=10,
-        default="Unisex",
-        verbose_name="Targeted Gender",
+    quantity = models.IntegerField(
+        default=0
     )
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created At")
-    updated_at = models.DateTimeField(auto_now=True, verbose_name="Updated At")
-    is_featured = models.BooleanField(default=False, verbose_name="Is Featured")
+    cost = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name="Cost Price"
+    )
+    price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        verbose_name="Selling Price"
+    )
+    discount_value = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        verbose_name="Discount Value"
+    )
+
+    is_featured = models.BooleanField(
+        default=False,
+        verbose_name="Is Featured"
+    )
+    expiring_date = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name="Expiring Date"
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Created At"
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name="Updated At"
+    )
 
     class Meta:
         db_table = "product"
+        verbose_name = "Product"
+        verbose_name_plural = "Products"
+        ordering = ["-created_at"]
 
     def __str__(self):
-        return self.name
+        return f"{self.name}: (Cost: {self.cost}, Price: {self.price})"
 
     def to_json(self):
         item = model_to_dict(self)
@@ -139,60 +227,33 @@ class Product(models.Model):
         )
         return item
 
-    @property
-    def prefixed_id(self):
-        return f"JBL{self.pk:03d}"
-
-
-class ProductVolume(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    product_type = models.CharField(
-        choices=PRODUCT_TYPE_CHOICES,
-        max_length=10,
-        default="Spray",
-        verbose_name="Type",
-    )
-    volume = models.ForeignKey(Volume, on_delete=models.CASCADE)
-
-    discount_value = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        null=True,
-        blank=True,
-        verbose_name="Discount Value",
-    )
-
-    class Meta:
-        unique_together = ("product", "volume", "product_type")
-        verbose_name = "Product Volume"
-        verbose_name_plural = "Product Volumes"
-
-    def __str__(self):
-        return f"{self.product.name} - {self.volume.ml}ML (Cost: {self.volume.cost}, Price: {self.volume.price})"
-
     def apply_discount(self):
-        """Apply the percentage discount to the price of the product volume."""
+        """Apply the percentage discount to the price of the product."""
         if self.discount_value:  # Assume all discounts are percentages
-            self.volume.price -= self.volume.price * self.discount_value / 100
+            self.price -= self.price * self.discount_value / 100
 
             # Ensure the price doesn't go below zero
-            self.volume.price = max(0, self.volume.price)
+            self.price = max(0, self.price)
             self.save()
 
     def get_discounted_price(self):
         """Get the discounted price with a percentage discount applied."""
-        discounted_price = self.volume.price
+        discounted_price = self.price
         if self.discount_value:  # Assume all discounts are percentages
-            discounted_price -= self.volume.price * self.discount_value / 100
+            discounted_price -= self.price * self.discount_value / 100
 
         return max(0, discounted_price)
+
+    def save(self, *args, **kwargs):
+        if not self.sku:
+            self.sku = str(uuid.uuid4()).split('-')[0].upper()  # e.g., 'F3D9A7'
+        super().save(*args, **kwargs)
 
 
 class ProductImage(models.Model):
     product = models.ForeignKey(
         Product, related_name="images", on_delete=models.CASCADE
     )
-    # image = CloudinaryField("image", blank=True, null=True)
     image = CloudinaryField(
         "image",
         validators=[
@@ -239,7 +300,7 @@ class ProductImage(models.Model):
     def save(self, *args, **kwargs):
         if self.image and not str(self.image).startswith("http"):
             upload_result = cloudinary.uploader.upload(
-                self.image.file, folder="product_images"
+                self.image.file, folder="stock_track_product_images"
             )
             self.image = upload_result["url"]
         super().save(*args, **kwargs)

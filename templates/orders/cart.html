@@ -19,17 +19,16 @@
                     <h6 class="mb-1 text-break">
                       <span class="text-primary fw-bold">{{ item.product.name }}</span> |
                       <span class="text-success">{{ item.product.category }}</span> |
-                      <span class="text-info">{{ item.product.gender }}</span> |
-                      <span class="text-warning">{{ item.volume.product_type }}</span>
+                      <span class="text-warning">{{ item.product_type }}</span>
                     </h6>
 
                     <small class="text-break">
-                      {{ item.volume.volume.ml }}ML (x{{ item.quantity }}) @{% if item.volume.discount_value %}
-                        <del class="text-muted">UgX {{ item.volume.volume.price|floatformat:'2'|intcomma }}</del>
-                        <span class="text-danger">UgX {{ item.volume.get_discounted_price|floatformat:'2'|intcomma }}</span>
-                        ({{ item.volume.discount_value|floatformat:'2' }}% Off)
+                      (x{{ item.quantity }}) @{% if item.discount_value %}
+                        <del class="text-muted">UgX {{ item.price|floatformat:'2'|intcomma }}</del>
+                        <span class="text-danger">UgX {{ item.get_discounted_price|floatformat:'2'|intcomma }}</span>
+                        ({{ item.discount_value|floatformat:'2' }}% Off)
                       {% else %}
-                        UgX {{ item.volume.volume.price|floatformat:'2'|intcomma }}
+                        UgX {{ item.price|floatformat:'2'|intcomma }}
                       {% endif %}each
                     </small>
                   </div>

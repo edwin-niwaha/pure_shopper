@@ -1,7 +1,7 @@
 from django.db import models
 import django.utils.timezone
 from apps.customers.models import Customer
-from apps.products.models import Product, ProductVolume
+from apps.products.models import Product
 from apps.orders.models import Order
 
 
@@ -54,12 +54,7 @@ class Sale(models.Model):
 
     def __str__(self) -> str:
         return (
-            "Sale ID: "
-            + str(self.id)
-            + " | Grand Total: "
-            + str(self.grand_total)
-            + " | Datetime: "
-            + str(self.date_added)
+            f"Sale ID: {self.id} | Grand Total: {self.grand_total} | Datetime: {self.date_added}"
         )
 
     def sum_items(self):
@@ -70,8 +65,8 @@ class Sale(models.Model):
         """Calculate total profit for the sale."""
         profit = 0
         for item in self.items.all():
-            for volume in item.product.volumes.all():
-                profit += (volume.price - volume.cost) * item.quantity
+
+            profit += (item.product.price - item.product.cost) * item.quantity
         return profit
 
     def total_items(self):
@@ -82,14 +77,10 @@ class Sale(models.Model):
         """Return the total revenue for the sale."""
         return self.grand_total
 
-
 # =================================== SaleDetail model ===================================
 class SaleDetail(models.Model):
     sale = models.ForeignKey(Sale, related_name="items", on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    product_volume = models.ForeignKey(
-        ProductVolume, null=True, blank=True, on_delete=models.CASCADE
-    )  # New field to track product volume
     price = models.FloatField()
     quantity = models.IntegerField()
     total_detail = models.FloatField()  # Total for the sale detail (price * quantity)
@@ -104,16 +95,9 @@ class SaleDetail(models.Model):
 
     def total_item_profit(self):
         """Calculate profit for a single item."""
-        if self.product_volume:
-            return (
-                self.product_volume.price - self.product_volume.cost
-            ) * self.quantity
-        return 0
+        # Calculate profit using the product's price and cost directly
+        return (self.product.price - self.product.cost) * self.quantity
 
     def total_item_value(self):
         """Calculate total value (price * quantity)."""
         return self.price * self.quantity
-
-    def volume_ml(self):
-        """Return the volume in ml if available."""
-        return self.product_volume.volume.ml if self.product_volume else None

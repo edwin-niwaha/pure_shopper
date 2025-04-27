@@ -18,51 +18,6 @@ urlpatterns = [
         views.categories_delete_view,
         name="categories_delete",
     ),
-    # ** Volume URLs **
-    path("volume/list", views.volume_list, name="volume_list"),
-    path("volume/add/", views.volume_add_view, name="volume_add"),
-    path(
-        "delete_volume/<int:volume_id>/", views.delete_volume_view, name="delete_volume"
-    ),
-    path(
-        "volume/update/<int:volume_id>/", views.volume_update_view, name="volume_update"
-    ),
-    path(
-        "filtered-volumes/",
-        views.product_volumes_list_view,
-        name="product-volumes-list",
-    ),
-    # ** Product Volume URLs **
-    path(
-        "volume/add/<int:product_id>/",
-        views.add_product_volume_view,
-        name="add_product_volume",
-    ),
-    path(
-        "product_volume/update/<int:product_id>/<int:volume_id>/",
-        views.update_product_volume_view,
-        name="update_product_volume",
-    ),
-    path(
-        "products/<int:product_id>/volumes/",
-        views.product_volume_list_view,
-        name="product_volume_list",
-    ),
-    path(
-        "volumes/<int:volume_id>/delete/",
-        views.delete_product_volume_view,
-        name="delete_product_volume",
-    ),
-    path(
-        "add-volume-to-all-products/",
-        views.add_volume_to_all_products_view,
-        name="add-volume-to-all-products",
-    ),
-    path(
-        "delete-volumes/",
-        views.delete_selected_volumes_view,
-        name="delete-selected-volumes",
-    ),
     # ** Product URLs **
     path("all", views.products_list_all, name="products_list_all"),
     path("", views.products_list_view, name="products_list"),

@@ -2,8 +2,6 @@ from django import forms
 from django.core.exceptions import ValidationError
 from .models import (
     Category,
-    Volume,
-    ProductVolume,
     Product,
     ProductImage,
     Review,
@@ -77,70 +75,7 @@ class CategoryForm(forms.ModelForm):
         }
 
 
-# =================================== volume form ===================================
-class VolumeForm(forms.ModelForm):
-    class Meta:
-        model = Volume
-        fields = ["ml", "cost", "price", "image"]
-        widgets = {
-            "ml": forms.NumberInput(attrs={"class": "form-control"}),
-        }
-        labels = {
-            "ml": "Volume in ML",
-        }
-
-    def clean_image(self):
-        image = self.cleaned_data.get("image")
-        return image
-
-
-# =================================== ProductVolumeForm form ===================================
-class ProductVolumeForm(forms.ModelForm):
-    MAX_IMAGE_SIZE_MB = 10
-
-    class Meta:
-        model = ProductVolume
-        # fields = ["volume", "product_type", "cost", "price", "discount_value", "image"]
-        fields = ["volume", "product_type", "discount_value"]
-        widgets = {
-            "volume": forms.Select(attrs={"class": "form-control"}),
-            "product_type": forms.Select(attrs={"class": "form-control"}),
-        }
-
-    def __init__(self, *args, **kwargs):
-        self.product = kwargs.pop("product", None)
-        super().__init__(*args, **kwargs)
-        # Dynamically populate the volume choices
-        self.fields["volume"].queryset = Volume.objects.all().order_by("ml")
-
-    def clean(self):
-        cleaned_data = super().clean()
-        volume = cleaned_data.get("volume")
-        product_type = cleaned_data.get("product_type")
-
-        # Check if a ProductVolume with the same product, volume, and product_type already exists
-        if (
-            ProductVolume.objects.filter(
-                product=self.product, volume=volume, product_type=product_type
-            )
-            .exclude(id=self.instance.id)
-            .exists()
-        ):
-            raise ValidationError(
-                "Oops! This combination of volume and product type is already assigned to this product."
-            )
-        return cleaned_data
-
-    def save(self, commit=True):
-        product_volume = super().save(commit=False)
-        if self.product:
-            product_volume.product = self.product
-        if commit:
-            product_volume.save()
-        return product_volume
-
-
-# =================================== Inventory form ===================================
+# ==================== Inventory form ===================================
 class InventoryForm(forms.ModelForm):
     class Meta:
         model = Inventory
@@ -171,7 +106,6 @@ class ProductForm(forms.ModelForm):
             "description",
             "status",
             "category",
-            "gender",
             "supplier",
         ]
         widgets = {
@@ -187,7 +121,6 @@ class ProductForm(forms.ModelForm):
             ),
             "status": forms.Select(attrs={"class": "form-control"}),
             "category": forms.Select(attrs={"class": "form-control"}),
-            "gender": forms.Select(attrs={"class": "form-control"}),
             "supplier": forms.Select(attrs={"class": "form-control"}),
         }
         labels = {
@@ -195,7 +128,6 @@ class ProductForm(forms.ModelForm):
             "description": "Description",
             "status": "Status",
             "category": "Category",
-            "gender": "Gender",
             "suppliers": "Suppliers",  # Label for the suppliers field
         }
 
@@ -222,19 +154,6 @@ class ProductImageForm(forms.ModelForm):
             raise forms.ValidationError("Image size should not exceed 1.5 MB.")
         return picture
 
-
-# =================================== Volume Selection Form ===================================
-class VolumeSelectionForm(forms.Form):
-    volume = forms.ModelChoiceField(
-        queryset=Volume.objects.all(),
-        widget=forms.Select(attrs={"class": "form-control"}),
-        label="Select Volume",
-    )
-    product_type = forms.ChoiceField(
-        choices=PRODUCT_TYPE_CHOICES,  # Choices for product type
-        widget=forms.Select(attrs={"class": "form-control"}),
-        label="Select Product Type",
-    )
 
 
 # =================================== Product Review Form ===================================

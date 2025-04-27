@@ -24,24 +24,21 @@ $(document).ready(function () {
         const $selectedOption = $productSelect.find('option:selected');
         const productId = $selectedOption.val();
         const productName = $selectedOption.data('name');
-        const productVolume = $selectedOption.data('volume');
         const productPrice = parseFloat($selectedOption.data('price'));
 
         // Add product row to the table if it hasn't been added already
         if (productId && !selectedProducts.includes(productId)) {
             selectedProducts.push(productId);
-            addProductRow(productId, productName, productVolume, productPrice);
             updateTotals();
         }
     }
 
     // Add new product row to the table
-    function addProductRow(productId, productName, productVolume, productPrice) {
+    function addProductRow(productId, productName, productPrice) {
         const newRow = `
       <tr>
         <td>${++productIndex}</td>
         <td>${productName}</td>
-        <td>${productVolume}</td>
         <td>${productPrice.toFixed(2)}</td>
         <td><input type="number" class="form-control quantity-input" value="1" min="1" data-price="${productPrice}" data-product-id="${productId}"></td>
         <td class="product-total">${productPrice.toFixed(2)}</td>

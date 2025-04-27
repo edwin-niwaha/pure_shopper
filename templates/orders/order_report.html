@@ -80,7 +80,6 @@
               <thead class="table-primary text-center">
                 <tr>
                   <th>Product</th>
-                  <th>Volume</th>
                   <th>Quantity</th>
                   <th class="text-right">Unit Price</th>
                   <th class="text-right">Total Price</th>
@@ -89,14 +88,8 @@
               <tbody>
                 {% for detail in order.details.all %}
                   <tr>
-                    <td>{{ detail.product.name }} | {{ detail.product.category }} | {{ detail.product.gender }} | {{ detail.product_volume.product_type }}</td>
-                    <td class="text-center">
-                      {% if detail.product_volume %}
-                        {{ detail.product_volume.volume.ml }} ML
-                      {% else %}
-                        No volume specified
-                      {% endif %}
-                    </td>
+                    <td>{{ detail.product.name }} | {{ detail.product.category }}| {{ detail.product.product_type }}</td>
+
                     <td class="text-center">{{ detail.quantity }}</td>
                     <td class="text-right">{{ detail.price|floatformat:'2'|intcomma }}</td>
                     <td class="text-right">{{ detail.total|floatformat:'2'|intcomma }}</td>

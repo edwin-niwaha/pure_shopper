@@ -61,48 +61,6 @@
             <tr>
               <th scope="row">Category</th>
               <td>{{ product.category }}</td>
-              <th scope="row">Gender</th>
-              <td>{{ product.gender }}</td>
-            </tr>
-            <tr>
-              <th scope="row">Type | Volume | Price</th>
-              <td colspan="3">
-                <select name="volume_id" id="volume" form="add-to-cart-form" class="form-control" required>
-                  <option value="" disabled selected>Choose a volume...</option>
-                  {% for product_volume in product_volumes %}
-                    <option value="{{ product_volume.id }}"
-                      data-image-url="{% if product_volume.volume.image %}
-                        {{ product_volume.volume.image.url }}
-                      {% else %}
-                        
-                        
-                        
-                        
-                        
-                        
-                        
-                        /staticfiles/images/no-image.png
-
-
-
-
-
-
-
-                      {% endif %}">
-                      {{ product_volume.product_type }} - {{ product_volume.volume.ml }} ML -{% if product_volume.discount_value %}
-                        <!-- Crossed-out original price if discounted -->
-                        <del class="text-muted">{{ product_volume.volume.price|floatformat:'2'|intcomma }}</del>
-                        <span class="text-danger">{{ product_volume.get_discounted_price|floatformat:'2'|intcomma }}</span>
-                        ({{ product_volume.discount_value|floatformat:'2' }}% Off)
-                      {% else %}
-                        <!-- Show regular price when no discount -->
-                        Price: {{ product_volume.volume.price|floatformat:'2'|intcomma }}
-                      {% endif %}
-                    </option>
-                  {% endfor %}
-                </select>
-              </td>
             </tr>
           </tbody>
         </table>
@@ -132,16 +90,6 @@
           {% endif %}
         </div>
         <hr />
-        <!-- Product Image Based on Volume Selection -->
-        <img id="volume-image"
-          class="d-block w-50 rounded-pill img-fluid product-image disable-right-click"
-          style="max-height: 45vh; object-fit: contain;"
-          src="{% if product_volumes and product_volumes.0.image %}
-            {{ product_volumes.0.image.url }}
-          {% else %}
-            {% static 'images/no-image.png' %}
-          {% endif %}"
-          alt="Product Image" />
       </div>
       <hr />
     </div>
@@ -228,25 +176,4 @@
       </div>
     </div>
   </div>
-
-  <!-- JavaScript for dynamic image update -->
-  <script>
-    document.getElementById('volume').addEventListener('change', function () {
-      // Get the selected option
-      var selectedOption = this.options[this.selectedIndex]
-    
-      // Get the image URL from the data attribute
-      var imageUrl = selectedOption.getAttribute('data-image-url')
-    
-      // Update the image source
-      document.getElementById('volume-image').src = imageUrl
-    })
-    
-    // disable-right-click
-    document.addEventListener('contextmenu', function (e) {
-      if (e.target.classList.contains('disable-right-click')) {
-        e.preventDefault()
-      }
-    })
-  </script>
 {% endblock %}

@@ -16,7 +16,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.db import transaction
 from .models import Cart, CartItem, Order, OrderDetail, Wishlist
-from apps.products.models import Product, ProductVolume, ProductImage
+from apps.products.models import Product, ProductImage
 from django.core.exceptions import MultipleObjectsReturned
 from .forms import CheckoutForm, OrderStatusForm
 from apps.customers.models import Customer
@@ -80,11 +80,6 @@ def product_detail(request, id):
     cart_items = CartItem.objects.filter(cart=cart)
     cart_count = sum(item.quantity for item in cart_items)
 
-    # Fetch volumes specific to this product
-    product_volumes = ProductVolume.objects.filter(product=product).order_by(
-        "volume__ml"
-    )
-
     # Fetch reviews
     reviews = Review.objects.filter(product=product, is_verified=True).order_by(
         "-created_at"
@@ -105,7 +100,6 @@ def product_detail(request, id):
 
     context = {
         "product": product,
-        "product_volumes": product_volumes,
         "cart_count": cart_count,
         "reviews": page_obj,  # Pass paginated reviews
         "verified_reviews_count": verified_reviews_count,  # Add verified reviews count
@@ -115,41 +109,24 @@ def product_detail(request, id):
 
 
 # =================================== Products Detail for quests not signed in ===================================
-
-
 def product_details_view(request, id):
     try:
-        # Fetch the product and related ProductVolume details
+        # Fetch the product
         product = Product.objects.get(id=id)
-        product_volumes = ProductVolume.objects.filter(product=product).order_by(
-            "volume__ml"
-        )
 
-        # Prepare context with product and volume details
+        # Prepare context with product details
         context = {
             "product_id": product.id,
             "name": product.name,
-            "gender": product.gender,
             "description": product.description,
             "category": product.category.name if product.category else "N/A",
-            "volumes": [],
+            "price": product.price,  # Using product's price directly
+            "discount_value": product.discount_value or 0,  # Assuming discount_value is on the product
+            "discounted_price": product.get_discounted_price(),  # Get the discounted price if available
         }
 
-        # Loop through ProductVolume instances to gather the volume details
-        for product_volume in product_volumes:
-            volume = product_volume.volume  # Get the related Volume object
-            discount_value = product_volume.discount_value or 0
-            volume_data = {
-                "ml": volume.ml,
-                "price": volume.price,
-                "image": volume.image.url if volume.image else "",
-                "product_type": product_volume.product_type,  # Include the product type if needed
-                "discount_value": discount_value,
-                "discounted_price": product_volume.get_discounted_price(),  # Apply any discount
-            }
-            context["volumes"].append(volume_data)
-
         return render(request, "orders/product_detail_partial.html", context)
+
     except Product.DoesNotExist:
         return render(
             request,
@@ -245,15 +222,6 @@ def add_to_cart(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     cart, created = Cart.objects.get_or_create(user=request.user)
     quantity = int(request.POST.get("quantity", 1))
-    volume_id = request.POST.get("volume_id")
-
-    # Validate the volume
-    if not volume_id:
-        messages.error(request, "Please select a product volume.")
-        return redirect("orders:product_detail", id=product_id)
-
-    # Fetch the selected volume
-    volume = get_object_or_404(ProductVolume, id=volume_id)
 
     if quantity <= 0:
         messages.add_message(
@@ -264,15 +232,9 @@ def add_to_cart(request, product_id):
         )
         return redirect("orders:product_detail", id=product_id)
 
-    try:
-        # Add volume to the CartItem creation or retrieval
-        cart_item, created = CartItem.objects.get_or_create(
-            cart=cart, product=product, volume=volume
-        )
-    except MultipleObjectsReturned:
-        cart_item = CartItem.objects.filter(
-            cart=cart, product=product, volume=volume
-        ).first()
+    cart_item, created = CartItem.objects.get_or_create(
+        cart=cart, product=product
+    )
 
     if not created:
         cart_item.quantity += quantity
@@ -280,7 +242,7 @@ def add_to_cart(request, product_id):
         messages.add_message(
             request,
             messages.INFO,
-            f"Increased quantity of {product.name} ({volume.volume.ml} ML) to {cart_item.quantity} in your cart.",
+            f"Increased quantity of {product.name} to {cart_item.quantity} in your cart.",
             extra_tags="bg-info text-white",
         )
     else:
@@ -289,7 +251,7 @@ def add_to_cart(request, product_id):
         messages.add_message(
             request,
             messages.SUCCESS,
-            f"{product.name} ({volume.volume.ml} ML) has been added to your cart with quantity {quantity}.",
+            f"{product.name} has been added to your cart with quantity {quantity}.",
             extra_tags="bg-success text-white",
         )
 
@@ -371,7 +333,6 @@ def send_order_email(
                     <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
                         <tr style="background-color: #f2f2f2;">
                             <th style="padding: 10px; border: 1px solid #ddd;">Product</th>
-                            <th style="padding: 10px; border: 1px solid #ddd;">Volume</th>
                             <th style="padding: 10px; border: 1px solid #ddd;">Qty</th>
                             <th style="padding: 10px; border: 1px solid #ddd;">Price @</th>
                             <th style="padding: 10px; border: 1px solid #ddd;">Image</th>
@@ -380,7 +341,6 @@ def send_order_email(
                             f"""
                             <tr>
                                 <td style="padding: 10px; border: 1px solid #ddd;">{item['product_name']}</td>
-                                <td style="padding: 10px; border: 1px solid #ddd;">{item['volume']} ML</td>
                                 <td style="padding: 10px; border: 1px solid #ddd;">{item['quantity']}</td>
                                 <td style="padding: 10px; border: 1px solid #ddd;">UgX {item['price']:,.2f}</td>
                                 <td style="padding: 10px; border: 1px solid #ddd;">
@@ -475,18 +435,15 @@ def checkout_view(request):
 
             # Create OrderDetail entries
             for item in cart.items.all():
-                product_volume = item.volume
-                discounted_price = product_volume.get_discounted_price()
+                product = item.product
+                discounted_price = product.get_discounted_price()
                 image_url = (
-                    product_volume.volume.image.url
-                    if product_volume.volume.image
-                    else ""
+                    product.image.url if product.image else ""
                 )
 
                 order_details.append(
                     {
                         "product_name": item.product.name,
-                        "volume": item.volume.volume.ml,
                         "quantity": item.quantity,
                         "price": discounted_price,
                         "image_url": image_url,
@@ -497,10 +454,9 @@ def checkout_view(request):
                 OrderDetail.objects.create(
                     order=order,
                     product=item.product,
-                    product_volume=item.volume,
                     quantity=item.quantity,
                     discounted_price=discounted_price,
-                    price=item.volume.volume.price,
+                    price=item.price,
                 )
 
             # Clear cart after checkout
@@ -548,7 +504,6 @@ def checkout_view(request):
         "orders/checkout.html",
         {"form": form, "cart": cart, "total_price": total_price},
     )
-
 
 # =================================== process_payment ===================================
 @login_required
@@ -808,30 +763,15 @@ def all_orders_view(request):
 # =================================== order_report_view ===================================
 @login_required
 def order_report_view(request, order_id):
-    # Fetch order with its details, and prefetch related volumes through ProductVolume
-    order = get_object_or_404(
-        Order.objects.prefetch_related(
-            "details__product__volumes",  # Prefetch volumes related to products in the order
-        ),
-        id=order_id,
-    )
+    order = get_object_or_404(Order, id=order_id)
 
     print("Order Details Count:", order.details.count())
 
-    # Printing product names, quantities, prices, and volume details for debugging
+    # Printing product names, quantities, prices for debugging
     for detail in order.details.all():
         print(detail.product.name, detail.quantity, detail.price)
 
-        # Fetch the first associated volume for each product (or logic for selecting one volume)
-        product_volumes = detail.product.volumes.all()
-        if product_volumes:
-            volume = product_volumes[
-                0
-            ]  # Assuming we take the first volume if available
-            print("Volume ML:", volume.ml)  # Print the volume in ML
-
     return render(request, "orders/order_report.html", {"order": order})
-
 
 # =================================== order_detail_view ===================================
 

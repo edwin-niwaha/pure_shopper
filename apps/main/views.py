@@ -36,11 +36,7 @@ def index(request):
     form = ProductFilterForm(request.GET)
 
     # Start with all active products
-    products = (
-        Product.objects.prefetch_related("images", "productvolume_set")
-        .filter(status="ACTIVE", is_featured=True)
-        .order_by("name")
-    )
+    products = Product.objects.prefetch_related("images").order_by("name")
 
     # Initialize counts for cart, wishlist, and orders
     cart_count = 0
@@ -54,9 +50,8 @@ def index(request):
         # Get or create the user's cart
         cart, _ = Cart.objects.get_or_create(user=request.user)
         cart_count = (
-            CartItem.objects.filter(cart=cart).aggregate(
-                total_quantity=Sum("quantity")
-            )["total_quantity"]
+            CartItem.objects.filter(cart=cart)
+            .aggregate(total_quantity=Sum("quantity"))["total_quantity"]
             or 0
         )
 
@@ -79,18 +74,11 @@ def index(request):
 
         # Filter by price range if provided
         if min_price is not None and max_price is not None:
-            products = products.filter(
-                productvolume__volume__price__gte=min_price,
-                productvolume__volume__price__lte=max_price,
-            ).distinct()
+            products = products.filter(price__gte=min_price, price__lte=max_price)
         elif min_price is not None:
-            products = products.filter(
-                productvolume__volume__price__gte=min_price
-            ).distinct()
+            products = products.filter(price__gte=min_price)
         elif max_price is not None:
-            products = products.filter(
-                productvolume__volume__price__lte=max_price
-            ).distinct()
+            products = products.filter(price__lte=max_price)
 
         # Filter by search query if provided
         if search_query:
@@ -112,34 +100,24 @@ def index(request):
     except EmptyPage:
         page_obj = paginator.page(paginator.num_pages)
 
-    # Prepare the products with images and volumes
+    # Prepare the products with images
     products_with_images = []
     for product in page_obj:
         images = product.images.filter(is_default=True)
         if not images.exists():
             images = product.images.all()
 
-        volumes = product.productvolume_set.all()
-        if volumes.exists():
-            min_vol_price = volumes.aggregate(Min("volume__price"))[
-                "volume__price__min"
-            ]
-            max_vol_price = volumes.aggregate(Max("volume__price"))[
-                "volume__price__max"
-            ]
-        else:
-            min_vol_price = max_vol_price = None
-
+        # Just use product's price directly
         products_with_images.append(
             {
                 "product": product,
                 "images": images,
-                "min_price": min_vol_price,
-                "max_price": max_vol_price,
+                "min_price": product.price,  # Direct price from Product
+                "max_price": product.price, 
             }
         )
 
-    # Handle testimonial and nesletter forms submission
+    # Handle testimonial and newsletter forms submission
     testimonial_form = TestimonialForm(request.POST or None)
     newsletter_form = NewsletterForm(request.POST or None)
 
@@ -207,17 +185,15 @@ def dashboard(request):
     # Helper function to get total sales for a period
     def get_total_sales_for_period(start_date, end_date):
         return (
-            Sale.objects.filter(trans_date__range=[start_date, end_date]).aggregate(
-                total_sales=Coalesce(Sum("grand_total"), 0.0)
-            )["total_sales"]
+            Sale.objects.filter(trans_date__range=[start_date, end_date])
+            .aggregate(total_sales=Coalesce(Sum("grand_total"), 0.0))["total_sales"]
             or 0
         )
 
     # Calculate monthly and annual earnings
     monthly_earnings = [
-        Sale.objects.filter(trans_date__year=year, trans_date__month=month).aggregate(
-            total=Coalesce(Sum("grand_total"), 0.0)
-        )["total"]
+        Sale.objects.filter(trans_date__year=year, trans_date__month=month)
+        .aggregate(total=Coalesce(Sum("grand_total"), 0.0))["total"]
         for month in range(1, 13)
     ]
     annual_earnings = format(sum(monthly_earnings), ".2f")
@@ -235,7 +211,7 @@ def dashboard(request):
 
     # Fetch all sales and prefetch related data
     sales = Sale.objects.prefetch_related(
-        "items__product_volume__volume", "items__product"
+        "items__product"
     )
 
     # Initialize total profit after sales
@@ -245,11 +221,9 @@ def dashboard(request):
     for sale in sales:
         for item in sale.items.all():
             product = item.product
-            product_volume = item.product_volume
 
-            # Determine volume and price details
-            volume = product_volume.volume if product_volume else None
-            cost = volume.cost if volume else 0
+            # Determine cost and price details for the product
+            cost = product.cost  # Direct cost from Product model
             discounted_price = item.price  # Price directly from SaleDetail
 
             # Calculate and accumulate profit

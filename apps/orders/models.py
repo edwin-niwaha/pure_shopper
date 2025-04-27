@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
-from apps.products.models import Product, ProductVolume
+from apps.products.models import Product
 from apps.customers.models import Customer
 from django.contrib.auth.models import User
 from django.utils.functional import cached_property
@@ -29,37 +29,31 @@ class Cart(models.Model):
                 order=order,
                 product=item.product,
                 quantity=item.quantity,
-                price=item.volume.price,
+                price=item.price,
             )
         self.items.all().delete()  # Clear the cart after checkout
         return order
 
-
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, related_name="items", on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    volume = models.ForeignKey(
-        ProductVolume, on_delete=models.CASCADE
-    )  # Link to the correct volume
     quantity = models.PositiveIntegerField(default=1)
 
     def __str__(self):
-        return f"{self.product.name} - {self.volume.volume.ml}ML (x{self.quantity})"
-
-    # def get_total_price(self):
-    #     return self.volume.price * self.quantity  # Use volume's price
+        return f"{self.product.name} (x{self.quantity})"
 
     def get_total_price(self):
         """
         Calculate the total price for the cart item, considering any applicable discounts.
         """
-        if self.volume.discount_value:
-            discounted_price = self.volume.volume.price * (
-                1 - self.volume.discount_value / 100
-            )
-            return discounted_price * self.quantity
-        return self.volume.volume.price * self.quantity
+        # Get the discounted price of the product if available
+        discounted_price = self.product.get_discounted_price()
 
+        # If there's no discount, use the regular price from the product
+        if discounted_price is None:
+            discounted_price = self.product.price
+
+        return discounted_price * self.quantity
 
 class Order(models.Model):
     ORDER_STATUS_CHOICES = [
@@ -113,7 +107,6 @@ class Order(models.Model):
 class OrderDetail(models.Model):
     order = models.ForeignKey(Order, related_name="details", on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    product_volume = models.ForeignKey(ProductVolume, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
     price = models.DecimalField(
         max_digits=10, decimal_places=2
@@ -135,11 +128,11 @@ class OrderDetail(models.Model):
         return self.discounted_price is not None and self.discounted_price < self.price
 
     def save(self, *args, **kwargs):
-        # Automatically use the ProductVolume's discounted price for the order detail
-        if not self.discounted_price and self.product_volume.discount_value:
-            self.discounted_price = self.product_volume.get_discounted_price()
-        super().save(*args, **kwargs)
+        # Automatically use the Product's discounted price for the order detail
+        if not self.discounted_price:
+            self.discounted_price = self.product.get_discounted_price()
 
+        super().save(*args, **kwargs)
 
 class Wishlist(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
