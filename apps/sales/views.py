@@ -2,8 +2,7 @@ import json
 import logging
 from decimal import Decimal
 from django.core.paginator import Paginator
-from django.db.models import Q
-from django.db.models import Sum, Count
+from django.db.models import  Count, Q, Sum, F, ExpressionWrapper, DecimalField
 from django.db import transaction
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -29,55 +28,50 @@ logger = logging.getLogger(__name__)
 
 
 # =================================== Sale list view ===================================
+
 @login_required
 @admin_or_manager_or_staff_required
 def sales_list_view(request):
-    # Get the search term from the GET request
-    search_query = request.GET.get("search", "")
-
-    # Filter sales based on search term (e.g., customer name or sale ID)
-    if search_query:
-        sales = (
-            Sale.objects.filter(
-                Q(customer__first_name__icontains=search_query)
-                | Q(customer__last_name__icontains=search_query)
-                | Q(id__icontains=search_query)
+    # Annotate sales with calculated profit
+    sales = (
+        Sale.objects.all()
+        .select_related("customer")
+        .prefetch_related("items__product")
+        .annotate(
+            profit=Sum(
+                ExpressionWrapper(
+                    F("items__price") - F("items__product__cost"),
+                    output_field=DecimalField(),
+                )
+                * F("items__quantity")
             )
-            .select_related("customer")
-            .prefetch_related("items__product")
-            .order_by("id")
         )
-    else:
-        sales = (
-            Sale.objects.all()
-            .select_related("customer")
-            .prefetch_related("items__product") 
-            .order_by("id")
-        )
+        .order_by("id")
+    )
 
-    # Paginate the sales (10 sales per page)
     paginator = Paginator(sales, 10)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
-    # Calculate grand total and total items
+    # Calculate aggregated totals
     grand_total = sales.aggregate(Sum("grand_total"))["grand_total__sum"] or 0
-    total_items = sum(
-        sale.sum_items() for sale in sales
-    )  # Assuming sum_items() method is defined
+    total_items = sum(sale.sum_items() for sale in sales)
+    total_profit = sales.aggregate(Sum("profit"))["profit__sum"] or 0
 
-    # Context with paginated sales and other variables
     context = {
-        "table_title": "sales",
+        "table_title": "Sales List",
         "sales": page_obj,
         "grand_total": grand_total,
         "total_items": total_items,
-        "search_query": search_query,  # Include search query for the search form
+        "total_profit": total_profit,
     }
 
-    return render(request, "sales/sales.html", context=context)
+    return render(request, "sales/sales.html", context)
+
+
 
 # =================================== sales_report_view view ===================================
+
 def sales_report_view(request):
     # Initialize the form with GET data
     form = ReportPeriodForm(request.GET)
@@ -89,9 +83,12 @@ def sales_report_view(request):
         end_date = form.cleaned_data["end_date"]
 
     # Filter sales by date range and prefetch related data
-    sales = Sale.objects.filter(
-        trans_date__range=[start_date, end_date]
-    ).prefetch_related("items__product")
+    sales = (
+        Sale.objects.all()
+        .select_related("customer")
+        .prefetch_related("items__product__inventory")
+        .order_by("id")
+    )
 
     # Aggregate totals
     total_sales = sales.aggregate(
@@ -100,7 +97,6 @@ def sales_report_view(request):
         total_transactions=Count("id"),
     )
 
-    # Calculate COGS (Cost of Goods Sold)
     cogs = 0
     for sale in sales:
         for item in sale.items.all():
@@ -122,14 +118,13 @@ def sales_report_view(request):
 
         for item in sale.items.all():
             product = item.product
-
-            # Get the original price from the Product (before discount)
-            original_price = product.price
+            # Get the original price from the ProductVolume (before discount)
+            original_price = (product.price)
 
             # Apply discount if exists (use price from SaleDetail)
-            discounted_price = item.price  # Use price from SaleDetail directly
+            discounted_price = item.price  # Use the price from SaleDetail directly
             item_profit = (
-                (Decimal(discounted_price) - product.cost) * item.quantity  # Use product cost directly
+                (Decimal(discounted_price) - product.cost) * item.quantity
                 if product
                 else 0
             )
@@ -141,7 +136,9 @@ def sales_report_view(request):
                     "product": product.name,
                     "original_price": original_price,  # Add original price
                     "price": discounted_price,  # Use price from SaleDetail
-                    "cost": product.cost,  # Use cost directly from Product
+                    "cost": (
+                        product.cost if product else 0
+                    ),
                     "quantity": item.quantity,
                     "total": item.total_detail,
                 }
@@ -179,14 +176,16 @@ def sales_report_view(request):
     return render(request, "sales/sales_report.html", context)
 
 
-# =================================== Sale Add view ===================================
+# =================================== Sale add view ===================================
 @admin_or_manager_or_staff_required
 @login_required
 def sales_add_view(request):
-    # Fetch products with active status and related inventory
-    products = Product.objects.filter(status="ACTIVE").select_related("inventory")
+    # Fetch only active products with their inventory
+    products = Product.objects.filter(
+        status="ACTIVE",
+        inventory__quantity__gt=0
+    ).select_related("inventory")
 
-    # Prepare context for rendering
     context = {
         "customers": [c.to_select2() for c in Customer.objects.all()],
         "products": products,
@@ -222,59 +221,57 @@ def sales_add_view(request):
                 products_data = request.POST.getlist("products")
                 for product_data_str in products_data:
                     product_data = json.loads(product_data_str)
-
-                    # Extract product ID and quantity from the form data
-                    product_id = int(product_data["id"])
-                    product_obj = Product.objects.get(id=product_id)
-
-                    # Fetch price and discount directly from the product
-                    original_price = product_obj.price
-                    discounted_price = product_obj.get_discounted_price()  # Apply discount if any
-
+                    product_obj = Product.objects.get(id=int(product_data["id"]))
                     quantity_requested = int(product_data["quantity"])
 
-                    # Check if the product's inventory has sufficient stock
+                    # Check if the product has inventory and stock is available
                     if (
                         not hasattr(product_obj, "inventory")
                         or product_obj.inventory.quantity < quantity_requested
                     ):
-                        raise ValueError(f"Oops! Insufficient stock for {product_obj.name}")
+                        raise ValueError(
+                            f"Oops! Insufficient stock for {product_obj.name}"
+                        )
 
-                    # Update inventory stock at the product level
+                    # Update inventory stock
                     inventory_obj = product_obj.inventory
                     inventory_obj.quantity -= quantity_requested
                     inventory_obj.save()
-                    logger.info(f"Stock updated for {product_obj.name}: {inventory_obj.quantity}")
+                    logger.info(
+                        f"Stock updated for {product_obj.name}: {inventory_obj.quantity}"
+                    )
 
                     # Create sale detail
                     detail_attributes = {
                         "sale": new_sale,
                         "product": product_obj,
-                        "price": discounted_price,  # Use discounted price
+                        "price": float(product_data["price"]),
                         "quantity": quantity_requested,
-                        "total_detail": discounted_price * quantity_requested,  # Apply discount in total
+                        "total_detail": float(product_data["total_product"]),
                     }
                     SaleDetail.objects.create(**detail_attributes)
                     logger.info(f"Sale detail added: {detail_attributes}")
 
-                # Success message
-                messages.success(request, "Sale created successfully!", extra_tags="bg-success")
-                return redirect("sales:sales_add")
+                messages.success(
+                    request, "Sale created successfully!", extra_tags="bg-success"
+                )
+                return redirect("sales:sales_list")
 
         except ValueError as ve:
             logger.error(f"Stock error: {ve}")
-            messages.error(request, str(ve), extra_tags="bg-danger")
+            messages.error(request, str(ve), extra_tags="danger")
         except Exception as e:
             logger.error(f"Error during sale creation: {e}")
             messages.error(
                 request,
                 f"There was an error during the creation! Error: {e}",
-                extra_tags="bg-danger",
+                extra_tags="danger",
             )
 
-        return redirect("sales:sales_add")
+        return redirect("sales:sales_list")
 
     return render(request, "sales/sales_add.html", context=context)
+
 
 # =================================== Sale details view ===================================
 @login_required
@@ -292,6 +289,7 @@ def sales_details_view(request, sale_id):
     }
 
     return render(request, "sales/sales_details.html", context=context)
+
 
 
 # =================================== Sale delete view ===================================

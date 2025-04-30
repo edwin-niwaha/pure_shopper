@@ -41,23 +41,11 @@ def shop_homepage_view(request):
     # Apply filters if the form is valid
     if form.is_valid():
         category_filter = form.cleaned_data.get("category")
-        min_price = form.cleaned_data.get("min_price")
-        max_price = form.cleaned_data.get("max_price")
         search_query = form.cleaned_data.get("search")
 
         # Filter by category if selected
         if category_filter:
             products = products.filter(category=category_filter)
-
-        # Filter by price range if provided
-        if min_price is not None and max_price is not None:
-            products = products.filter(
-                price__gte=min_price, price__lte=max_price
-            )
-        elif min_price is not None:
-            products = products.filter(price__gte=min_price)
-        elif max_price is not None:
-            products = products.filter(price__lte=max_price)
 
         # Filter by search query if provided
         if search_query:
@@ -91,7 +79,7 @@ def shop_homepage_view(request):
             {
                 "product": product,
                 "images": images,
-                "price": product.price,  # Direct price field on product
+                "price": product.price,  # Directly use the price from the product
             }
         )
 
@@ -269,14 +257,14 @@ def products_list_all(request):
     )
 
     # Calculate total quantity, cost, and price directly from Product model
-    total_quantity = sum(product.quantity for product in products)  # Using 'quantity' from Product
-    total_cost = sum(product.cost for product in products)  # Summing up cost directly from Product
-    total_price = sum(product.price for product in products)  # Summing up price directly from Product
+    total_quantity = sum(product.inventory.quantity for product in products)
+    total_cost = sum(product.cost for product in products) 
+    total_price = sum(product.price for product in products)
 
     context = {
         "products": products,
         "total_stock": total_stock,
-        "total_quantity": total_quantity,  # Include total quantity in context
+        "total_quantity": total_quantity,
         "total_cost": total_cost,
         "total_price": total_price,
     }
@@ -313,17 +301,13 @@ def products_list_view(request):
         products = paginator.page(paginator.num_pages)
 
     # Calculate totals using product attributes directly
-    total_price = sum(
-        product.price * product.inventory.quantity for product in products if product.inventory
-    ) or 0
+    # Calculate total quantity, cost, and price directly from Product model
 
-    total_cost = sum(
-        product.cost * product.inventory.quantity for product in products if product.inventory
-    ) or 0
+    total_cost = sum(product.cost for product in products) 
+    total_price = sum(product.price for product in products)
 
-    total_stock = (
-        Product.objects.aggregate(total_stock=Sum("inventory__quantity"))["total_stock"]
-        or 0
+    total_stock = sum(
+        product.inventory.quantity for product in products if product.inventory
     )
 
     context = {
@@ -351,19 +335,29 @@ def products_add_view(request):
     if request.method == "POST":
         form = ProductForm(request.POST)
         if form.is_valid():
-            # Check if a product with the same attributes exists
             attributes = form.cleaned_data
-            if Product.objects.filter(**attributes).exists():
+
+            existing_product = Product.objects.filter(
+                name=attributes['name'],
+                category=attributes.get('category'),
+                supplier=attributes.get('supplier'),
+            ).first()
+
+            if existing_product:
                 messages.error(
                     request, "Product already exists!", extra_tags="bg-warning"
                 )
                 return redirect("products:products_add")
 
             try:
-                form.save()
+                product = form.save()
+
+                # Create Inventory after saving the Product
+                Inventory.objects.create(product=product)
+
                 messages.success(
                     request,
-                    f"Product: {attributes['name']} created successfully!",
+                    f"Product: {product.name} created successfully!",
                     extra_tags="bg-success",
                 )
                 return redirect("products:products_list")

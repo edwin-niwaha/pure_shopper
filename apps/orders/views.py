@@ -358,7 +358,7 @@ def send_order_email(
                     </div>
 
                     <p>Thank you for shopping with us!</p>
-                    <p style="color: #888;">- Jobel Inc Management</p>
+                    <p style="color: #888;">- Perpetual Tech Management</p>
                 </div>
             </body>
         </html>
@@ -370,13 +370,13 @@ def send_order_email(
         <body style="font-family: Arial, sans-serif; color: #333;">
             <div style="max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
                 <h2 style="color: #C0392B; text-align: center;">New Order to Process</h2>
-                <p>Hello <strong>Jobel Inc Team</strong>,</p>
+                <p>Hello <strong>Perpetual Tech Team</strong>,</p>
                 <p>A new order has been placed. The order ID is <strong>{order_id}</strong>. Please review and process the order by clicking the button below:</p>
                 <div style="text-align: center; margin: 20px 0;">
                     <a href="{orders_to_be_processed_url}" style="background-color: #C0392B; color: #fff; text-decoration: none; padding: 10px 20px; border-radius: 5px;">Process Order</a>
                 </div>
                 <p>Thanks for your prompt attention!</p>
-                <p style="color: #888;">- Jobel Inc Management</p>
+                <p style="color: #888;">- Perpetual Tech Management</p>
             </div>
         </body>
         </html>
@@ -437,9 +437,12 @@ def checkout_view(request):
             for item in cart.items.all():
                 product = item.product
                 discounted_price = product.get_discounted_price()
-                image_url = (
-                    product.image.url if product.image else ""
-                )
+                # image_url = (
+                #     product.image.url if product.image else ""
+                # )
+                # Get the first associated image for the product
+                product_image = product.images.first()  # Assuming you want the first image
+                image_url = product_image.image.url if product_image and product_image.image else ""
 
                 order_details.append(
                     {
@@ -456,7 +459,7 @@ def checkout_view(request):
                     product=item.product,
                     quantity=item.quantity,
                     discounted_price=discounted_price,
-                    price=item.price,
+                    price=item.product.price,
                 )
 
             # Clear cart after checkout
@@ -473,7 +476,7 @@ def checkout_view(request):
                 is_customer=True,
             )
             send_order_email(
-                "Jobel Inc",
+                "Perpetual Tech",
                 settings.EMAIL_HOST_USER,
                 order.id,
                 order_details,
@@ -868,7 +871,7 @@ def send_order_status_email(recipient_name, recipient_email, order_status):
             </div>
 
             <p>Thank you for choosing us, and we look forward to serving you again soon!</p>
-            <p style="color: #888;">Warm regards,<br>The Jobel Inc. Team<br>Customer Support</p>
+            <p style="color: #888;">Warm regards,<br>The Perpetual Tech. Team<br>Customer Support</p>
         </div>
     </body>
     </html>

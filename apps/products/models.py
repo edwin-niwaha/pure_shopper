@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.forms import model_to_dict
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 from django.core.validators import FileExtensionValidator
 from apps.supplier.models import Supplier
 from cloudinary.models import CloudinaryField
@@ -23,15 +24,6 @@ STATUS_CHOICES = [
 ]
 
 
-# Define choices for product type
-PRODUCT_TYPE_CHOICES = [
-    ("", "-- Choose product type --"),
-    ("Roll-On", "Roll-On"),
-    ("Spray", "Spray"),
-    ("Diffuser", "Diffuser"),
-]
-
-
 class Category(models.Model):
     name = models.CharField(
         max_length=100,
@@ -47,91 +39,6 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
-
-
-# class Product(models.Model):
-#     name = models.CharField(max_length=256, verbose_name="Product Name")
-#     description = models.TextField(verbose_name="Product Description")
-#     status = models.CharField(
-#         choices=STATUS_CHOICES, max_length=10, verbose_name="Status"
-#     )
-#     category = models.ForeignKey(
-#         Category,
-#         related_name="products",
-#         on_delete=models.SET_NULL,
-#         null=True,
-#         blank=True,
-#         verbose_name="Category",
-#     )
-#     quantity = models.IntegerField(default=0)
-#     cost = models.DecimalField(
-#         max_digits=10, decimal_places=2, verbose_name="Cost Price"
-#     )
-#     price = models.DecimalField(
-#         max_digits=10, decimal_places=2, verbose_name="Selling Price"
-#     )
-#     supplier = models.ForeignKey(
-#         Supplier,
-#         related_name="products",
-#         on_delete=models.SET_NULL,
-#         null=True,
-#         blank=True,
-#         verbose_name="Supplier",
-#     )
-#     discount_value = models.DecimalField(
-#         max_digits=10,
-#         decimal_places=2,
-#         null=True,
-#         blank=True,
-#         verbose_name="Discount Value",
-#     )
-#     is_featured = models.BooleanField(default=False, verbose_name="Is Featured")
-#     expiring_date = models.DateTimeField(null=True, blank=True)
-#     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created At")
-#     updated_at = models.DateTimeField(auto_now=True, verbose_name="Updated At")
-
-#     class Meta:
-#         db_table = "product"
-
-#     def __str__(self):
-#         return f"{self.name}: (Cost: {self.cost}, Price: {self.price})"
-
-
-#     def to_json(self):
-#         item = model_to_dict(self)
-#         item.update(
-#             {
-#                 "id": self.id,
-#                 "text": self.name,
-#                 "category": self.category.name if self.category else None,
-#                 "quantity": (
-#                     self.inventory.quantity if hasattr(self, "inventory") else 0
-#                 ),
-#                 "total_product": 0,
-#             }
-#         )
-#         return item
-
-#     def apply_discount(self):
-#         """Apply the percentage discount to the price of the product."""
-#         if self.discount_value:  # Assume all discounts are percentages
-#             self.price -= self.price * self.discount_value / 100
-
-#             # Ensure the price doesn't go below zero
-#             self.price = max(0, self.price)
-#             self.save()
-
-#     def get_discounted_price(self):
-#         """Get the discounted price with a percentage discount applied."""
-#         discounted_price = self.price
-#         if self.discount_value:  # Assume all discounts are percentages
-#             discounted_price -= self.price * self.discount_value / 100
-
-#         return max(0, discounted_price)
-    
-#     @property
-#     def prefixed_id(self):
-#         return f"SKU{self.pk:03d}"
 
 
 class Product(models.Model):
@@ -163,9 +70,6 @@ class Product(models.Model):
         null=True,
         blank=True,
         verbose_name="Supplier"
-    )
-    quantity = models.IntegerField(
-        default=0
     )
     cost = models.DecimalField(
         max_digits=10,
@@ -243,6 +147,14 @@ class Product(models.Model):
             discounted_price -= self.price * self.discount_value / 100
 
         return max(0, discounted_price)
+
+    def clean(self):
+        # Check if expiring_date is provided and is behind today's date
+        if self.expiring_date and self.expiring_date < timezone.now():
+            raise ValidationError({"expiring_date": "The expiring date cannot be in the past or today."})
+
+        super().clean()
+
 
     def save(self, *args, **kwargs):
         if not self.sku:

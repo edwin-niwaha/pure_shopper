@@ -3,8 +3,10 @@
   <!-- Sidebar Branding -->
   <div class="text-center sidebar-brand-wrapper d-flex align-items-center">
     <div style="font-size: 24px; white-space: nowrap;">
-      <span class="sidebar-brand brand-logo" style="color: #127D61;">Stock</span>
-      <span style="color: #F79420;">Track</span>
+      <a href="/" class="text-decoration-none">
+        <span class="sidebar-brand brand-logo" style="color: #127D61;">Stock</span>
+        <span style="color: #F79420;">Track</span>
+      </a>
     </div>
   </div>
 
@@ -32,7 +34,7 @@
     <li class="nav-item">
       <a class="nav-link" href="{% url 'supplier:supplier_list' %}">
         <i class="mdi mdi-factory menu-icon"></i>
-        <span class="menu-title">Manage Suppliers</span>
+        <span class="menu-title">Suppliers</span>
       </a>
     </li>
 
@@ -40,7 +42,7 @@
     <li class="nav-item">
       <a class="nav-link" data-toggle="collapse" href="#ui-basic-sp" aria-expanded="false" aria-controls="ui-basic-sp">
         <i class="mdi mdi-package menu-icon"></i>
-        <span class="menu-title">Manage Products</span>
+        <span class="menu-title">Products</span>
         <i class="menu-arrow"></i>
       </a>
       <div class="collapse" id="ui-basic-sp">
@@ -51,6 +53,9 @@
           <li class="nav-item">
             <a class="nav-link" href="{% url 'products:products_list' %}" target="_self"><i class="mdi mdi-package menu-icon"></i> Product List</a>
           </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'products:products_list_all' %}" target="_self"><i class="mdi mdi-package menu-icon"></i> All Product List</a>
+          </li>
         </ul>
       </div>
     </li>
@@ -59,13 +64,13 @@
     <li class="nav-item">
       <a class="nav-link" data-toggle="collapse" href="#inventory-menu" aria-expanded="false" aria-controls="inventory-menu">
         <i class="mdi mdi-warehouse menu-icon"></i>
-        <span class="menu-title">Manage Inventory</span>
+        <span class="menu-title">Inventory</span>
         <i class="menu-arrow"></i>
       </a>
       <div class="collapse" id="inventory-menu">
         <ul class="nav flex-column sub-menu">
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'inventory:inventory_list' %}"><i class="mdi mdi-box-cutter menu-icon"></i> Manage Stock</a>
+            <a class="nav-link" href="{% url 'inventory:inventory_list' %}"><i class="mdi mdi-box-cutter menu-icon"></i> Stock</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="{% url 'products:stock_alerts' %}" target="_self"><i class="mdi mdi-alert menu-icon"></i> Stock Alerts</a>
@@ -86,7 +91,7 @@
     <li class="nav-item">
       <a class="nav-link" href="{% url 'sales:sales_list' %}">
         <i class="mdi mdi-trending-up menu-icon"></i>
-        <span class="menu-title">Manage Sales</span>
+        <span class="menu-title">Sales</span>
       </a>
     </li>
 
@@ -120,6 +125,13 @@
             </li>
           </ul>
         </div>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'customers:customers_list' %}">
+          <i class="mdi mdi-account-multiple menu-icon"></i>
+          <span class="menu-title">Customers</span>
+        </a>
       </li>
 
       <!-- Reports Section for Admin -->

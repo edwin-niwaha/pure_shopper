@@ -4,9 +4,7 @@ from .models import (
     Category,
     Product,
     ProductImage,
-    Review,
-    PRODUCT_TYPE_CHOICES,
-)
+    Review,)
 from apps.inventory.models import Inventory
 
 
@@ -98,6 +96,9 @@ class InventoryForm(forms.ModelForm):
 
 
 # =================================== product form ===================================
+from django import forms
+from .models import Product
+
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
@@ -107,28 +108,32 @@ class ProductForm(forms.ModelForm):
             "status",
             "category",
             "supplier",
+            "cost",
+            "price",
+            "discount_value",
+            "expiring_date",
         ]
         widgets = {
-            "name": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Enter product name"}
-            ),
-            "description": forms.Textarea(
-                attrs={
-                    "class": "form-control",
-                    "placeholder": "Enter product description",
-                    "rows": 3,
-                }
-            ),
+            "name": forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter product name"}),
+            "description": forms.Textarea(attrs={"class": "form-control", "placeholder": "Enter product description", "rows": 3}),
             "status": forms.Select(attrs={"class": "form-control"}),
             "category": forms.Select(attrs={"class": "form-control"}),
             "supplier": forms.Select(attrs={"class": "form-control"}),
+            "cost": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
+            "price": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
+            "discount_value": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
+            "expiring_date": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
         }
         labels = {
             "name": "Product Name",
             "description": "Description",
             "status": "Status",
             "category": "Category",
-            "suppliers": "Suppliers",  # Label for the suppliers field
+            "supplier": "Supplier",
+            "cost": "Cost Price",
+            "price": "Selling Price",
+            "discount_value": "Discount Value",
+            "expiring_date": "Expiration Date",
         }
 
 

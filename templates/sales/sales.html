@@ -1,132 +1,162 @@
-{% extends 'base.html' %}
-{% load static %}
-{% load humanize %}
+{% extends 'base_rpts.html' %}
+{% load static %} {% load humanize %}
 {% load crispy_forms_tags %}
-
 {% block content %}
-  <div class="container-fluid py-3">
-    <div class="row mb-3">
-      <div class="col-md-12 d-flex justify-content-between align-items-center">
-        <a href="{% url 'sales:sales_add' %}">
-          <button type="button" class="btn btn-info font-weight-bold">
-            <i class="mdi mdi-arrow-left-bold mr-2"></i>
-            Go back
-          </button>
-        </a>
-        <div class="d-flex">
-          <a href="{% url 'sales:sales_add' %}" class="btn btn-dark ml-2">
-            <i class="mdi mdi-plus mr-2"></i>
-            Create Sale
+  <div class="form-content my-5 p-5">
+    <div class="container-fluid">
+      <div class="row mb-3">
+        <div class="col-md-12 d-flex justify-content-between align-items-center">
+          <a href="{% url 'dashboard' %}">
+            <button type="button" class="btn btn-info font-weight-bold">
+              <i class="mdi mdi-arrow-left-bold mr-2"></i>
+              Go back
+            </button>
           </a>
-          <button title="Print" type="button" class="btn btn-success ml-2" onclick="printDiv('printMe')"><i class="mdi mdi-printer btn-icon-prepend"></i></button>
+          <div class="d-flex">
+            <a href="{% url 'sales:sales_add' %}" class="btn btn-dark ml-2">
+              <i class="mdi mdi-plus mr-2"></i>
+              Create Sale
+            </a>
+            <button title="Print" type="button" class="btn btn-success ml-2" onclick="printDiv('printMe')"><i class="mdi mdi-printer btn-icon-prepend"></i></button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- Search Form -->
-    <form method="get" class="d-flex mb-3">
-      <input type="text" name="search" class="form-control" placeholder="Search Sales" value="{{ search_query }}" />
-      <button type="submit" class="btn btn-primary ml-2">Search</button>
-    </form>
-
-    <!-- DataTable -->
-    <div id="printMe" class="card shadow mb-4">
-      <div class="card-header py-3">
-        <h3>{{ table_title|upper }}</h3>
-      </div>
-      <div class="card-body">
-        <div class="table-responsive">
-          <table class="table table-striped table-hover table-bordered align-middle">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Date</th>
-                <th>Customer</th>
-                <th class="text-center">Item Details</th>
-                <th class="text-center">Total Sales</th>
-                <th class="text-center">Qty</th>
-                <th colspan="3" class="text-center print-hide">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for s in sales %}
+      <!-- DataTable -->
+      <div id="printMe" class="card shadow mb-4">
+        <div class="card-header py-3">
+          <h3>{{ table_title|upper }}</h3>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="my-table" id="dataTable">
+              <thead>
                 <tr>
-                  <td>{{ forloop.counter }}</td>
-                  <td>{{ s.trans_date }}</td>
-                  <td>{{ s.customer.get_full_name }}</td>
-                  <td style="width: 300px;">
-                    <div class="mb-4">
-                      <ul class="list-group">
+                  <th>#</th>
+                  <th>S.ID</th>
+                  <th>Date</th>
+                  <th>Customer</th>
+                  <th>Product</th>
+                  <th class="text-center">Sold</th>
+                  <th class="text-center">Sales Revenue</th>
+                  <th class="text-center">Net Profit</th>
+                  <th colspan="3" class="text-center print-hide">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for s in sales %}
+                  <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ s.id }}</td>
+                    <td>{{ s.trans_date }}</td>
+                    <td>{{ s.customer.first_name }}</td>
+                    <td>
+                      <ul class="list-group list-group-flush">
                         {% for detail in s.items.all %}
-                          <li class="list-group-item d-flex justify-content-between align-items-center">
+                          <li class="list-group-item d-flex justify-content-between align-items-start">
                             <div>
-                              <h6 class="mb-1">{{ detail.product.name }} -</h6>
-                              <small>{{ detail.quantity }} Item(s) - Price: UgX {{ detail.price|floatformat:'2'|intcomma }} @</small>
+                              <strong>{{ detail.quantity }}x</strong>
+                              {{ detail.product.name }}
+                            </div>
+                            <div class="text-end">
+                              <small class="text-muted">
+                                Cost:
+                                {{ detail.product.cost|floatformat:'2'|intcomma }}
+                              </small><br />
+                              <small class="text-muted">Price: {{ detail.product.price|floatformat:'2'|intcomma }}</small>
                             </div>
                           </li>
+                        {% empty %}
+                          <li class="list-group-item text-danger">No items available.</li>
                         {% endfor %}
                       </ul>
-                    </div>
-                  </td>
-                  <td class="text-right">{{ s.grand_total|floatformat:'2'|intcomma }}</td>
-                  <td class="text-center">{{ s.sum_items }}</td>
-                  <td class="text-center print-hide">
-                    <a href="{% url 'sales:sales_details' s.id %}" class="text-decoration-none"><button type="button" class="btn btn-info btn-sm" data-bs-toggle="tooltip" title="View Sale"><i class="fas fa-eye"></i></button></a>
-                  </td>
-                  <td class="print-hide">
-                    <a href="{% url 'sales:sales_receipt_pdf' s.id %}" class="text-decoration-none" target="_blank"><button type="button" class="btn btn-dark btn-sm" data-bs-toggle="tooltip" title="View Receipt"><i class="fas fa-receipt"></i></button></a>
-                  </td>
-                  <td class="text-center print-hide">
-                    {% if user.profile.role == 'administrator' or user.profile.role == 'manager' %}
-                      <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ s.id }}" title="Delete Sale"><i class="mdi mdi-delete-outline"></i></button>
-                      <div class="modal fade" id="deleteModal{{ s.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ s.id }}" aria-hidden="true">
-                        <div class="modal-dialog">
-                          <div class="modal-content">
-                            <div class="modal-header">
-                              <h5 class="modal-title" id="deleteModalLabel{{ s.id }}">Delete Sale</h5>
-                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">X</button>
-                            </div>
-                            <div class="modal-body">
-                              Are you sure you want to delete the sale: <strong>{{ s.id }}</strong>?
-                            </div>
-                            <div class="modal-footer">
-                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                              <a href="{% url 'sales:delete_sale' s.id %}" class="text-decoration-none"><button type="button" class="btn btn-danger">Delete</button></a>
+                    </td>
+
+                    <td class="text-center">{{ s.sum_items }}</td>
+                    <td class="text-right">{{ s.grand_total|floatformat:'2'|intcomma }}</td>
+                    <td class="text-right">{{ s.profit|floatformat:'2'|intcomma }}</td>
+                    <td class="text-center print-hide">
+                      <a href="{% url 'sales:sales_details' s.id %}" class="text-decoration-none"><button type="button" class="btn btn-info btn-sm" data-bs-toggle="tooltip" title="Update sale"><i class="fas fa-eye"></i></button></a>
+                    </td>
+                    <td class="print-hide">
+                      <a href="{% url 'sales:sales_receipt_pdf' s.id %}" class="text-decoration-none" target="_blank"><button type="button" class="btn btn-dark btn-sm" data-bs-toggle="tooltip" title="View Receipt"><i class="fas fa-receipt"></i></button></a>
+                    </td>
+                    <td class="text-center print-hide">
+                      {% if user.profile.role == 'administrator' or user.profile.role == 'manager' %}
+                        <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ s.id }}" title="Delete sale"><i class="bi bi-trash"></i></button>
+
+                        <!-- Delete Modal -->
+                        <div class="modal fade" id="deleteModal{{ s.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ s.id }}" aria-hidden="true">
+                          <div class="modal-dialog">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title" id="deleteModalLabel{{ s.id }}">Delete Sale</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">X</button>
+                              </div>
+                              <div class="modal-body">
+                                Are you sure you want to delete the sale:
+                                <h3>{{ s.id }}?</h3>
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                <a href="{% url 'sales:delete_sale' s.id %}" class="text-decoration-none"><button type="button" class="btn btn-danger">Delete</button></a>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    {% endif %}
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="5" class="text-right">
+                    <strong>Total</strong>
+                  </td>
+                  <td class="text-center">
+                    <strong>{{ total_items }}</strong>
+                  </td>
+                  <td class="text-right">
+                    <strong>{{ grand_total|floatformat:'2'|intcomma }}</strong>
+                  </td>
+                  <td class="text-right">
+                    <strong>{{ total_profit|floatformat:'2'|intcomma }}</strong>
                   </td>
                 </tr>
-              {% endfor %}
-            </tbody>
-            <tfoot>
-              <tr>
-                <td colspan="4" class="text-right">
-                  <strong>Total</strong>
-                </td>
-                <td class="text-right">
-                  <strong>{{ grand_total|floatformat:'2'|intcomma }}</strong>
-                </td>
-                <td class="text-center">
-                  <strong>{{ total_items }}</strong>
-                </td>
-              </tr>
-            </tfoot>
-          </table>
-          <!-- Pagination -->
-          <div class="d-flex justify-content-between">
-            <div>
-              {% if sales.has_previous %}
-                <a href="?page=1&search={{ search_query }}" class="btn btn-link">First</a>
-                <a href="?page={{ sales.previous_page_number }}&search={{ search_query }}" class="btn btn-link">Previous</a>
-              {% endif %}
-              <span>Page {{ sales.number }} of {{ sales.paginator.num_pages }}</span>
-              {% if sales.has_next %}
-                <a href="?page={{ sales.next_page_number }}&search={{ search_query }}" class="btn btn-link">Next</a>
-                <a href="?page={{ sales.paginator.num_pages }}&search={{ search_query }}" class="btn btn-link">Last</a>
-              {% endif %}
+              </tfoot>
+            </table>
+            <div class="d-flex justify-content-between align-items-center mt-4">
+              <div>
+                <span>Showing {{ sales.start_index }} to {{ sales.end_index }} of {{ sales.paginator.count }} sales</span>
+              </div>
+              <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-end">
+                  {% if sales.has_previous %}
+                    <li class="page-item">
+                      <a class="page-link" href="?page={{ sales.previous_page_number }}" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>
+                    </li>
+                  {% endif %}
+
+                  {% for num in sales.paginator.page_range %}
+                    {% if sales.number == num %}
+                      <li class="page-item active">
+                        <a class="page-link">{{ num }}</a>
+                      </li>
+                    {% elif num > sales.number|add:'-3' and num < sales.number|add:'3' %}
+                      <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                      </li>
+                    {% endif %}
+                  {% endfor %}
+
+                  {% if sales.has_next %}
+                    <li class="page-item">
+                      <a class="page-link" href="?page={{ sales.next_page_number }}" aria-label="Next"><span aria-hidden="true">&raquo;</span></a>
+                    </li>
+                  {% endif %}
+                </ul>
+              </nav>
             </div>
           </div>
         </div>

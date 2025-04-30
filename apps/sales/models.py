@@ -1,4 +1,5 @@
 from django.db import models
+from decimal import Decimal
 import django.utils.timezone
 from apps.customers.models import Customer
 from apps.products.models import Product
@@ -54,28 +55,18 @@ class Sale(models.Model):
 
     def __str__(self) -> str:
         return (
-            f"Sale ID: {self.id} | Grand Total: {self.grand_total} | Datetime: {self.date_added}"
+            "Sale ID: "
+            + str(self.id)
+            + " | Grand Total: "
+            + str(self.grand_total)
+            + " | Datetime: "
+            + str(self.date_added)
         )
 
     def sum_items(self):
         details = SaleDetail.objects.filter(sale=self.id)
         return sum([d.quantity for d in details])
 
-    def total_profit(self):
-        """Calculate total profit for the sale."""
-        profit = 0
-        for item in self.items.all():
-
-            profit += (item.product.price - item.product.cost) * item.quantity
-        return profit
-
-    def total_items(self):
-        """Calculate total number of items sold in the sale."""
-        return sum([item.quantity for item in self.items.all()])
-
-    def total_revenue(self):
-        """Return the total revenue for the sale."""
-        return self.grand_total
 
 # =================================== SaleDetail model ===================================
 class SaleDetail(models.Model):
@@ -83,21 +74,23 @@ class SaleDetail(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     price = models.FloatField()
     quantity = models.IntegerField()
-    total_detail = models.FloatField()  # Total for the sale detail (price * quantity)
+    total_detail = models.FloatField()
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created at")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Updated at")
 
     class Meta:
         db_table = "SaleDetails"
 
+    def calculate_profit(self):
+        # Convert price to Decimal to ensure compatibility with cost, then calculate profit
+        return (Decimal(self.price) - self.product.cost) * self.quantity
+
     def __str__(self) -> str:
-        return f"Detail ID: {self.id} | Sale ID: {self.sale.id} | Quantity: {self.quantity} | Product: {self.product.name}"
-
-    def total_item_profit(self):
-        """Calculate profit for a single item."""
-        # Calculate profit using the product's price and cost directly
-        return (self.product.price - self.product.cost) * self.quantity
-
-    def total_item_value(self):
-        """Calculate total value (price * quantity)."""
-        return self.price * self.quantity
+        return (
+            "Detail ID: "
+            + str(self.id)
+            + " Sale ID: "
+            + str(self.sale.id)
+            + " Quantity: "
+            + str(self.quantity)
+        )
