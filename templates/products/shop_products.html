@@ -53,7 +53,7 @@
 
                 <!-- Hover View Product Details -->
                 <div class="hover-overlay">
-                  <a class="badge bg-danger position-absolute top-0 end-0 translate-middle-y py-2 px-4" href="{% url 'orders:product_details_view' product.id %}">View Details</a>
+                  {% comment %} <a class="badge bg-danger position-absolute top-0 end-0 translate-middle-y py-2 px-4" href="{% url 'orders:product_details_view' product.id %}">View Details</a> {% endcomment %}
                   <a class="btn btn-primary btn-sm" href="{% url 'orders:product_detail' product.id %}">Shop Now</a>
                 </div>
 
@@ -64,7 +64,13 @@
                   <p class="card-text">
                     <strong>Price:</strong>
                     {% if product_info.price %}
-                      UGX {{ product_info.price|floatformat:'2'|intcomma }}
+                      {% if product_info.product.discount_value %}
+                        UGX <strong class="text-danger">{{ product_info.product.get_discounted_price|floatformat:'2'|intcomma }}</strong>
+                        <span class="text-muted" style="text-decoration: line-through;">{{ product_info.price|floatformat:'2'|intcomma }}</span>
+                        <span class="badge bg-success ms-1">{{ product_info.product.discount_value|floatformat:'0' }}% OFF</span>
+                      {% else %}
+                        UGX <strong>{{ product_info.price|floatformat:'2'|intcomma }}</strong>
+                      {% endif %}
                     {% else %}
                       Price not available
                     {% endif %}

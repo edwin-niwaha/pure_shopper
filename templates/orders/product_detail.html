@@ -62,9 +62,21 @@
               <th scope="row">Category</th>
               <td>{{ product.category }}</td>
             </tr>
+            <tr>
+              <th scope="row">Price</th>
+              <td colspan="3" class="alert alert-info mb-0">
+                {% if product.discount_value %}
+                  <strong class="h4 text-danger">{{ product.get_discounted_price|floatformat:'2'|intcomma }}</strong>
+                  <strong class="h4 text-muted" style="text-decoration: line-through;">{{ product.price|floatformat:'2'|intcomma }}</strong>
+                  <strong class="h5 text-success">({{ product.discount_value|floatformat:'0' }}% off)</strong>
+                {% else %}
+                  <strong class="h4">{{ product.price|floatformat:'2'|intcomma }}</strong>
+                {% endif %}
+              </td>
+            </tr>
           </tbody>
         </table>
-
+        <hr />
         <!-- Add to Cart and View Cart Section -->
         <div class="d-flex flex-column flex-md-row align-items-center mt-3">
           <form id="add-to-cart-form" action="{% url 'orders:add_to_cart' product.id %}" method="post" class="form-inline mb-3 mb-md-0">
@@ -90,6 +102,18 @@
           {% endif %}
         </div>
         <hr />
+        <table class="table table-bordered rounded-3 overflow-hidden">
+          <thead class="text-warning">
+            <tr class="fs-5">
+              <th scope="col">Product Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{{ product.description }}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
       <hr />
     </div>
