@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+  <div class="container-fluid">
+    <div class="row mb-3">
+      <div class="col-md-12 d-flex justify-content-between align-items-center">
+        <a href="{% url 'supplier:purchase_order_create' %}" class="btn btn-dark ml-2">
+          <i class="mdi mdi-plus mr-2"></i>
+          Add Purchase Order
+        </a>
+        <div class="d-flex">
+          <button title="Print" type="button" class="btn btn-success ml-2" onclick="printDiv('printMe')"><i class="mdi mdi-printer btn-icon-prepend"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search Form -->
+    <div class="row mb-3">
+      <div class="col-md-12">
+        <form method="get" action="{% url 'supplier:purchase-orders-list' %}">
+          <div class="input-group">
+            <input type="text" class="form-control" name="search" value="{{ search_query }}" placeholder="Search by name or contact" />
+            <button class="btn btn-primary" type="submit"><i class="mdi mdi-magnify"></i> Search</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- DataTable -->
+    <div id="printMe" class="card shadow mb-4">
+      <div class="card-header py-3">
+        <h3>{{ table_title|upper }}</h3>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="my-table" id="dataTable">
+            <thead>
+              <tr>
+                <th>PO #</th>
+                <th>Supplier</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Total Items</th>
+                <th>Total Qty</th>
+                <th>Total(UgX)</th>
+                <th class="print-hide" colspan="4" class="text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for order in orders %}
+                <tr>
+                  <td>{{ order.id }}</td>
+                  <td>{{ order.supplier.name }}</td>
+                  <td>{{ order.order_date }}</td>
+                  <td class="badge bg-info text-dark">{{ order.get_status_display }}</td>
+                  <td>{{ order.items.count }} item{{ order.items.count|pluralize }}</td>
+                  <td>{{ order.aggregate_total_quantity }}</td>
+                  <td>{{ order.total_amount|floatformat:'2'|intcomma }}</td>
+                  <td class="text-center print-hide">
+                    <a title="View Order Details" href="{% url 'supplier:purchase-order-detail' order.id %}"><i class="fas fa-eye"></i></a>
+                  </td>
+                  <td class="text-center print-hide">
+                    <!-- Update Button -->
+                    <a href="{% url 'supplier:purchase-order-update' order.id %}" class="text-decoration-none" onclick="return confirm('Are you sure you want to update this order?');"><button type="button" class="btn btn-warning btn-sm" title="Update Order"><i class="bi bi-pencil"></i></button></a>
+                  </td>
+                  <td class="text-center print-hide">
+                    <!-- Delete Button trigger modal -->
+                    <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ order.id }}" title="Delete Order"><i class="bi bi-trash"></i></button>
+
+                    <!-- Delete Confirmation Modal -->
+                    <div class="modal fade" id="deleteModal{{ order.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ order.id }}" aria-hidden="true">
+                      <div class="modal-dialog">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="deleteModalLabel{{ order.id }}">Delete Order</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">X</button>
+                          </div>
+                          <div class="modal-body">
+                            Are you sure you want to delete Order #<strong>{{ order.id }}</strong>?
+                          </div>
+                          <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <!-- Form for Deleting the Order -->
+                            <form method="POST" action="{% url 'supplier:purchase-order-delete' order.id %}">
+                              {% csrf_token %}
+                              <button type="submit" class="btn btn-danger">Delete</button>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination">
+          <span class="step-links">
+            {% if page_obj.has_previous %}
+              <a href="?page=1&search={{ search_query }}">&laquo; first</a>
+              <a href="?page={{ page_obj.previous_page_number }}&search={{ search_query }}">previous</a>
+            {% endif %}
+
+            <span class="current">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.</span>
+
+            {% if page_obj.has_next %}
+              <a href="?page={{ page_obj.next_page_number }}&search={{ search_query }}">next</a>
+              <a href="?page={{ page_obj.paginator.num_pages }}&search={{ search_query }}">last &raquo;</a>
+            {% endif %}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

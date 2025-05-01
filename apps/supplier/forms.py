@@ -1,6 +1,6 @@
 # forms.py
 from django import forms
-from .models import Supplier
+from .models import Supplier,  PurchaseOrder, PurchaseOrderItem
 
 
 class SupplierForm(forms.ModelForm):
@@ -28,3 +28,23 @@ class SupplierForm(forms.ModelForm):
                 raise forms.ValidationError("Phone number must contain only digits.")
 
         return cleaned_data  # Don't forget to return cleaned_data!
+
+
+class PurchaseOrderForm(forms.ModelForm):
+    class Meta:
+        model = PurchaseOrder
+        fields = ['supplier', 'status', 'notes']
+        widgets = {
+            'supplier': forms.Select(attrs={'class': 'form-control'}),
+            'status': forms.Select(attrs={'class': 'form-control'}),
+            'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
+
+class PurchaseOrderItemForm(forms.ModelForm):
+    class Meta:
+        model = PurchaseOrderItem
+        fields = ['product', 'quantity', 'unit_price']
+        widgets = {
+            'unit_price': forms.NumberInput(attrs={'step': '0.01'}),
+            'quantity': forms.NumberInput(attrs={'min': '1'}),
+        }

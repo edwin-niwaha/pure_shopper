@@ -212,7 +212,7 @@ class ProductImage(models.Model):
     def save(self, *args, **kwargs):
         if self.image and not str(self.image).startswith("http"):
             upload_result = cloudinary.uploader.upload(
-                self.image.file, folder="stock_track_product_images"
+                self.image.file, folder="pure_shopper_product_images"
             )
             self.image = upload_result["url"]
         super().save(*args, **kwargs)

@@ -144,6 +144,7 @@ tzlocal==5.2
 uritools==4.0.3
 urllib3==2.2.1
 virtualenv==20.25.0
+wagtail==6.4.1
 wagtail-cache==2.5.1
 wagtail-seo==2.5.0
 webencodings==0.5.1

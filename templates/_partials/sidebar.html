@@ -78,6 +78,13 @@
         </ul>
       </div>
     </li>
+    <!-- Purchase Orders -->
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'supplier:purchase-orders-list' %}">
+        <i class="mdi mdi-truck menu-icon"></i>
+        <span class="menu-title">Purchase Orders</span>
+      </a>
+    </li>
 
     <!-- Sales Orders -->
     <li class="nav-item">
@@ -186,7 +193,10 @@
     {% else %}
       <!-- Non-admin Finance, Reports, and Settings -->
       <li class="nav-item">
-        <a class="nav-link" href="#" onclick="showMessageSettings(event)"><i class="mdi mdi-alert menu-icon"></i> Settings</a>
+        <a class="nav-link" href="#" onclick="showMessageSettings(event)">
+          <i class="mdi mdi-alert menu-icon"></i>
+          <span class="menu-title">Settings</span>
+        </a>
       </li>
     {% endif %}
   </ul>
