@@ -22,7 +22,7 @@
       <div class="container-fluid">
         <a class="navbar-brand fw-bold" href="{% url 'users-home' %}">
           <i class="fas fa-chart-line me-2"></i>
-          <span style="color: #127D61;">Stock</span><span style="color: #F79420;">Track</span>
+          <span style="color: #127D61;">Pure</span><span style="color: #F79420;">Shopper</span>
         </a>
 
         <button class="navbar-toggler" type="button" data-mdb-toggle="collapse" data-mdb-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><i class="fas fa-bars"></i></button>
@@ -45,15 +45,6 @@
             <li class="nav-item">
               <a class="nav-link" href="{% url 'products:shop_homepage' %}">PRODUCTS</a>
             </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'about_us' %}">ABOUT US</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'contact_us' %}">CONTACT US</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">HELP & SUPPORT</a>
-            </li>
           </ul>
           <ul class="navbar-nav ms-auto mb-2 mb-lg-0" style="font-family: 'Times New Roman', Times, serif">
             {% if user.is_authenticated %}
@@ -75,7 +66,7 @@
             <li class="nav-item">
               <a href="{% url 'orders:cart' %}" class="position-relative nav-link text-dark" title="View Cart">
                 <div class="d-flex align-items-center">
-                  <i class="mdi mdi-cart fs-5 text-primary"></i>
+                  <i class="mdi mdi-cart fs-5 text-warning"></i>
                   <!-- Badge for Cart Count -->
                   <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ cart_count_user|default:0 }}</span>
                 </div>

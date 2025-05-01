@@ -1,48 +1,31 @@
 
-# 📦 StockTrack
+# 📦 PureShopper
 **Smart Sales & Inventory Management System**
 
-StockTrack is a powerful system for small to medium-sized businesses, combining real-time inventory tracking with seamless sales management. Optimize stock levels, automate reordering, and gain insights to boost efficiency and growth—across storefronts, warehouses, or online channels.
-
+PureShopper is a powerful all-in-one e-commerce solution designed for small to medium-sized businesses. It seamlessly integrates real-time inventory tracking with streamlined sales management, helping you optimize stock levels, automate reordering, and uncover insights that drive efficiency and growth. Whether managing storefronts, warehouses, or online channels, PureShopper empowers your business to operate smarter and scale faster.
 
 ---
 
-## 🚀 Features
-
-### 🔹 **Core Features**
+### 🔹 **Core E-commerce Features**
 
 - **Real-Time Inventory Tracking**  
-  **Monitor stock levels** across multiple locations with live updates.
+  **Monitor stock levels** across multiple warehouses and online sales channels with live updates.
 
-- **Sales Management**  
-  **Record and manage sales transactions** with integrated POS or online order syncing.
+- **Integrated Sales Management**  
+  **Manage online orders, POS transactions, and marketplace sales from a single dashboard.**
 
 - **Automated Reordering**  
-  **Set stock thresholds** to trigger automatic restock alerts or orders.
+  **Set stock thresholds to trigger restock alerts or automatic supplier orders.**
 
 - **Multi-Location Support**  
-  **Track inventory and sales** across stores, warehouses, and sales channels.
+  **Track inventory and sales across online stores, retail locations, and marketplaces like Amazon, eBay, and Etsy.**
 
 - **Product Catalog Management**  
-  **Organize products** by categories, variants, pricing, and SKUs.
+  **Create and organize product listings with categories, variants, images, pricing, SKUs, and SEO-friendly descriptions.**
 
 - **Supplier & Purchase Order Management**  
-  **Manage vendors**, create purchase orders, and track inbound stock.
+  **Manage vendor relationships, automate purchase orders, and track inbound inventory shipments.**
 
----
-
-### 📊 **Analytics & Insights**
-
-- **Sales & Inventory Reports**  
-  **Gain insights** into best-selling products, stock turnover, and profit margins.
-
-- **Demand Forecasting**  
-  **Predict stock needs** based on sales trends and seasonality.
-
-- **Inventory Valuation**  
-  **Track inventory value** using FIFO, LIFO, or average cost methods.
-
----
 
 ### 🔐 **Additional Features**
 
@@ -95,8 +78,8 @@ StockTrack is a powerful system for small to medium-sized businesses, combining 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/edwin-niwaha/stock-track
-cd stock-track
+git clone https://github.com/edwin-niwaha/pure_shopper
+cd pure_shopper
 ```
 
 ### 2. Set Up Python Environment
@@ -165,4 +148,4 @@ MIT License
 
 ## 📬 Contact
 
-For questions or demo requests, contact us at **support@stocktrack.io**
+For questions or demo requests, contact us at **support@pure_shopper.io**

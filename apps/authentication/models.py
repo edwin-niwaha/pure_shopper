@@ -109,8 +109,8 @@ class Contact(models.Model):
                 raise ValidationError({"email": e.message})
 
         # Validate message length
-        if len(self.message) > 100:
-            raise ValidationError("Message cannot exceed 100 characters.")
+        if len(self.message) > 1000:
+            raise ValidationError("Message cannot exceed 1000 characters.")
 
     def save(self, *args, **kwargs):
         self.full_clean()  # Calls clean() before saving to enforce validations
