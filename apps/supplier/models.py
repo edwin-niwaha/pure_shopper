@@ -4,6 +4,14 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 from phonenumber_field.modelfields import PhoneNumberField
 import phonenumbers
+from django.core.mail import EmailMultiAlternatives
+from django.utils.html import strip_tags
+
+from django.conf import settings
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 class Supplier(models.Model):
@@ -67,6 +75,7 @@ class PurchaseOrder(models.Model):
     def aggregate_total_quantity(self):
         return self.items.aggregate(total=Sum('quantity'))['total'] or 0
 
+            
     class Meta:
         db_table = 'purchase_order'
         verbose_name = 'Purchase Order'
@@ -76,7 +85,7 @@ class PurchaseOrder(models.Model):
 
 class PurchaseOrderItem(models.Model):
     purchase_order = models.ForeignKey(PurchaseOrder, related_name='items', on_delete=models.CASCADE)
-    product = models.CharField(max_length=255)
+    product = models.ForeignKey('products.Product', on_delete=models.PROTECT)
     quantity = models.PositiveIntegerField()
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created at")
@@ -85,6 +94,14 @@ class PurchaseOrderItem(models.Model):
     def total_price(self):
         return self.quantity * self.unit_price
 
+    def __str__(self):
+        return f"{self.product.name} (x{self.quantity})"
+
+    def save(self, *args, **kwargs):
+        if not self.unit_price:
+            self.unit_price = self.product.cost
+        super().save(*args, **kwargs)
+        
     class Meta:
         db_table = 'purchase_order_item'
         verbose_name = 'Purchase Order Item'

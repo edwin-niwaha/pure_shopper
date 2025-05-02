@@ -43,7 +43,7 @@ class PurchaseOrderForm(forms.ModelForm):
 class PurchaseOrderItemForm(forms.ModelForm):
     class Meta:
         model = PurchaseOrderItem
-        fields = ['product', 'quantity', 'unit_price']
+        fields = ['product', 'quantity']
         widgets = {
             'unit_price': forms.NumberInput(attrs={'step': '0.01'}),
             'quantity': forms.NumberInput(attrs={'min': '1'}),

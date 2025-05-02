@@ -2,7 +2,7 @@
 {% load static %}
 {% load humanize %}
 {% block content %}
-  <div class="container mt-5 mb-4">
+  <div class="container mt-3 mb-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h2 class="text-primary">
         <i class="mdi mdi-file-document-outline me-2"></i>
@@ -10,81 +10,84 @@
       </h2>
       <div>
         <a href="{% url 'supplier:purchase-orders-list' %}" class="btn btn-outline-secondary me-2"><i class="mdi mdi-arrow-left"></i> Back</a>
-        <a href="{% url 'supplier:purchase-order-update' order.id %}" class="btn btn-warning"><i class="mdi mdi-pencil"></i> Edit Order</a>
+        <button title="Print" type="button" class="btn btn-success ml-2" onclick="printDiv('printMe')"><i class="mdi mdi-printer btn-icon-prepend"></i></button>
+        {% comment %} <a href="{% url 'supplier:purchase-order-update' order.id %}" class="btn btn-warning"><i class="mdi mdi-pencil"></i> Edit Order</a> {% endcomment %}
       </div>
     </div>
 
-    <div class="card shadow-sm mb-4">
-      <div class="card-header bg-light">
-        <h5 class="mb-0 text-secondary"><i class="mdi mdi-information-outline me-1"></i> Order Details</h5>
-      </div>
-      <div class="card-body">
-        <div class="row gy-3">
-          <div class="col-md-6">
-            <p>
-              <strong>Supplier:</strong> {{ order.supplier.name }}
-            </p>
-            <p>
-              <strong>Order Date:</strong> {{ order.order_date|date:'Y-m-d' }}
-            </p>
-            <p>
-              <strong>Status:</strong>
-              <span class="badge bg-info text-dark">{{ order.get_status_display }}</span>
-            </p>
-          </div>
-          <div class="col-md-6">
-            <p>
-              <strong>Notes:</strong> {{ order.notes|default:'No notes provided.' }}
-            </p>
-            <p>
-              <strong>Created At:</strong> {{ order.created_at|date:'Y-m-d H:i' }}
-            </p>
-            <p>
-              <strong>Total Amount:</strong>
-              <span class="text-success fw-bold">UgX{{ order.total_amount|floatformat:'2'|intcomma }}</span>
-            </p>
+    <div id="printMe">
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+          <h5 class="mb-0 text-secondary"><i class="mdi mdi-information-outline me-1"></i> Order Details</h5>
+        </div>
+        <div class="card-body">
+          <div class="row gy-3">
+            <div class="col-md-6">
+              <p>
+                <strong>Supplier:</strong> {{ order.supplier.name }}
+              </p>
+              <p>
+                <strong>Order Date:</strong> {{ order.order_date|date:'Y-m-d' }}
+              </p>
+              <p>
+                <strong>Status:</strong>
+                <span class="badge bg-info text-dark">{{ order.get_status_display }}</span>
+              </p>
+            </div>
+            <div class="col-md-6">
+              <p>
+                <strong>Notes:</strong> {{ order.notes|default:'No notes provided.' }}
+              </p>
+              <p>
+                <strong>Created At:</strong> {{ order.created_at|date:'Y-m-d H:i' }}
+              </p>
+              <p>
+                <strong>Total Amount:</strong>
+                <span class="text-success fw-bold">UgX{{ order.total_amount|floatformat:'2'|intcomma }}</span>
+              </p>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="card shadow-sm">
-      <div class="card-header bg-light">
-        <h5 class="mb-0 text-secondary"><i class="mdi mdi-cart-outline me-1"></i> Order Items</h5>
-      </div>
-      <div class="card-body p-0">
-        {% if order.items.all %}
-          <div class="table-responsive">
-            <table class="table table-striped table-hover mb-0">
-              <thead class="table-light">
-                <tr class="text-center">
-                  <th>#</th>
-                  <th>Product</th>
-                  <th>Quantity</th>
-                  <th>Unit Price</th>
-                  <th>Total</th>
-                  <th>Added On</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for item in order.items.all %}
-                  <tr class="text-center align-middle">
-                    <td>{{ forloop.counter }}</td>
-                    <td>{{ item.product }}</td>
-                    <td>{{ item.quantity }}</td>
-                    <td>${{ item.unit_price|floatformat:'2'|intcomma }}</td>
-                    <td>${{ item.total_price|floatformat:'2'|intcomma }}</td>
-                    <td>{{ item.created_at|date:'Y-m-d H:i' }}</td>
+      <div class="card shadow-sm">
+        <div class="card-header bg-light">
+          <h5 class="mb-0 text-secondary"><i class="mdi mdi-cart-outline me-1"></i> Order Items</h5>
+        </div>
+        <div class="card-body p-0">
+          {% if order.items.all %}
+            <div class="table-responsive">
+              <table class="table table-striped table-hover mb-0">
+                <thead class="table-light">
+                  <tr class="text-center">
+                    <th>#</th>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Unit Price(UgX)</th>
+                    <th>Total(UgX)</th>
+                    <th>Added On</th>
                   </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-        {% else %}
-          <div class="p-3 text-muted text-center">
-            <i class="mdi mdi-alert-circle-outline me-2"></i>No items found for this order.
-          </div>
-        {% endif %}
+                </thead>
+                <tbody>
+                  {% for item in order.items.all %}
+                    <tr class="text-center align-middle">
+                      <td>{{ forloop.counter }}</td>
+                      <td>{{ item.product }}</td>
+                      <td>{{ item.quantity }}</td>
+                      <td>{{ item.unit_price|floatformat:'2'|intcomma }}</td>
+                      <td>{{ item.total_price|floatformat:'2'|intcomma }}</td>
+                      <td>{{ item.created_at|date:'Y-m-d H:i' }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% else %}
+            <div class="p-3 text-muted text-center">
+              <i class="mdi mdi-alert-circle-outline me-2"></i>No items found for this order.
+            </div>
+          {% endif %}
+        </div>
       </div>
     </div>
   </div>

@@ -11,6 +11,7 @@ from apps.authentication.decorators import (
     admin_required,
 )
 from django.forms import modelformset_factory
+from django.views.decorators.http import require_POST
 # =================================== supplier list view ===================================
 @login_required
 @admin_or_manager_or_staff_required
@@ -247,3 +248,16 @@ def purchase_order_detail(request, pk):
         'order': order,
         'items': items
     })
+
+
+@require_POST
+def purchase_order_update_status(request, pk):
+    order = get_object_or_404(PurchaseOrder, pk=pk)
+    new_status = request.POST.get('status')
+    if new_status in dict(PurchaseOrder.STATUS_CHOICES).keys():
+        order.status = new_status
+        order.save()
+        messages.success(request, f"Status for Order #{order.id} updated successfully.", extra_tags="bg-success")
+    else:
+        messages.error(request, "Invalid status selected.")
+    return redirect('supplier:purchase-orders-list')

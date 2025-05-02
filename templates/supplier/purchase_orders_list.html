@@ -59,6 +59,45 @@
                   <td>{{ order.aggregate_total_quantity }}</td>
                   <td>{{ order.total_amount|floatformat:'2'|intcomma }}</td>
                   <td class="text-center print-hide">
+                    <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#statusModal{{ order.id }}" title="Update Status"><i class="bi bi-arrow-repeat"></i></button>
+                    <!-- Status Update Modal -->
+                    <div class="modal fade" id="statusModal{{ order.id }}" tabindex="-1" aria-labelledby="statusModalLabel{{ order.id }}" aria-hidden="true">
+                      <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                          <form method="POST" action="{% url 'supplier:purchase-order-update-status' order.id %}">
+                            {% csrf_token %}
+                            <div class="modal-header bg-info text-white">
+                              <h5 class="modal-title" id="statusModalLabel{{ order.id }}">
+                                <i class="bi bi-arrow-repeat me-2"></i>Update Order Status
+                              </h5>
+                              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+
+                            <div class="modal-body">
+                              <div class="mb-3">
+                                <label for="statusSelect{{ order.id }}" class="form-label">Select New Status</label>
+                                <select class="form-select" id="statusSelect{{ order.id }}" name="status" required>
+                                  {% for value, display in order.STATUS_CHOICES %}
+                                    <option value="{{ value }}" {% if order.status == value %}selected{% endif %}>{{ display }}</option>
+                                  {% endfor %}
+                                </select>
+                              </div>
+                            </div>
+
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="bi bi-x-circle me-1"></i>Cancel
+                              </button>
+                              <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle me-1"></i>Update
+                              </button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="text-center print-hide">
                     <a title="View Order Details" href="{% url 'supplier:purchase-order-detail' order.id %}"><i class="fas fa-eye"></i></a>
                   </td>
                   <td class="text-center print-hide">
@@ -68,7 +107,6 @@
                   <td class="text-center print-hide">
                     <!-- Delete Button trigger modal -->
                     <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ order.id }}" title="Delete Order"><i class="bi bi-trash"></i></button>
-
                     <!-- Delete Confirmation Modal -->
                     <div class="modal fade" id="deleteModal{{ order.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ order.id }}" aria-hidden="true">
                       <div class="modal-dialog">
