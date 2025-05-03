@@ -25,14 +25,12 @@ SITE_URL = f"https://{BASE_DOMAIN}"
 
 # Allowed hosts and trusted origins
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", BASE_DOMAIN]
-CSRF_TRUSTED_ORIGINS = [
-    f"https://{BASE_DOMAIN}",
-    "http://localhost",
-    "http://127.0.0.1",
-]
+CSRF_TRUSTED_ORIGINS = ["https://pureshopper-production.up.railway.app", "http://localhost", "http://127.0.0.1"]
+
 
 # CORS configuration
-CORS_ALLOWED_ORIGINS = [f"https://{BASE_DOMAIN}"]
+CORS_ALLOWED_ORIGINS = [SITE_URL]
+
 
 
 # Security settings --comment in dev
