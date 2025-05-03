@@ -28,7 +28,13 @@
                 <div class="form-row">
                   <div class="col-md-6">
                     <div class="form-group">
-                      <img class="rounded-circle img-fluid" src="{{ user.profile.avatar.url }}" style="cursor: pointer; width: 50px; height: 50px;" />
+                      {% comment %} <img class="rounded-circle img-fluid" src="{{ user.profile.avatar.url }}" style="cursor: pointer; width: 50px; height: 50px;" /> {% endcomment %}
+                      {% if user.profile.avatar %}
+                        <img class="rounded-circle img-fluid" src="{{ user.profile.avatar.url }}" style="cursor: pointer; width: 50px; height: 50px;" />
+                      {% else %}
+                        <img class="rounded-circle img-fluid" src="{% static 'images/default-avatar.png' %}" style="cursor: pointer; width: 50px; height: 50px;" />
+                      {% endif %}
+
                       {{ user.first_name }} {{ user.last_name }}
                       <hr />Role:{% if user.profile.role %}
                         <small class="text-muted">({{ user.profile.get_role_display }})</small>
