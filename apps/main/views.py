@@ -10,7 +10,6 @@ from django.db.models import Sum, FloatField, F
 from django.db.models.functions import Coalesce
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.db.models import Min, Max
 from django.core.paginator import Paginator, EmptyPage
 
 from apps.products.models import Product, Category, Review
@@ -50,8 +49,9 @@ def index(request):
         # Get or create the user's cart
         cart, _ = Cart.objects.get_or_create(user=request.user)
         cart_count = (
-            CartItem.objects.filter(cart=cart)
-            .aggregate(total_quantity=Sum("quantity"))["total_quantity"]
+            CartItem.objects.filter(cart=cart).aggregate(
+                total_quantity=Sum("quantity")
+            )["total_quantity"]
             or 0
         )
 
@@ -113,7 +113,7 @@ def index(request):
                 "product": product,
                 "images": images,
                 "min_price": product.price,  # Direct price from Product
-                "max_price": product.price, 
+                "max_price": product.price,
             }
         )
 
@@ -185,15 +185,17 @@ def dashboard(request):
     # Helper function to get total sales for a period
     def get_total_sales_for_period(start_date, end_date):
         return (
-            Sale.objects.filter(trans_date__range=[start_date, end_date])
-            .aggregate(total_sales=Coalesce(Sum("grand_total"), 0.0))["total_sales"]
+            Sale.objects.filter(trans_date__range=[start_date, end_date]).aggregate(
+                total_sales=Coalesce(Sum("grand_total"), 0.0)
+            )["total_sales"]
             or 0
         )
 
     # Calculate monthly and annual earnings
     monthly_earnings = [
-        Sale.objects.filter(trans_date__year=year, trans_date__month=month)
-        .aggregate(total=Coalesce(Sum("grand_total"), 0.0))["total"]
+        Sale.objects.filter(trans_date__year=year, trans_date__month=month).aggregate(
+            total=Coalesce(Sum("grand_total"), 0.0)
+        )["total"]
         for month in range(1, 13)
     ]
     annual_earnings = format(sum(monthly_earnings), ".2f")
@@ -210,9 +212,7 @@ def dashboard(request):
     top_products = get_top_selling_products()
 
     # Fetch all sales and prefetch related data
-    sales = Sale.objects.prefetch_related(
-        "items__product"
-    )
+    sales = Sale.objects.prefetch_related("items__product")
 
     # Initialize total profit after sales
     total_profit_after_sales = Decimal(0)

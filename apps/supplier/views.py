@@ -12,6 +12,8 @@ from apps.authentication.decorators import (
 )
 from django.forms import modelformset_factory
 from django.views.decorators.http import require_POST
+
+
 # =================================== supplier list view ===================================
 @login_required
 @admin_or_manager_or_staff_required
@@ -118,30 +120,32 @@ def supplier_delete(request, supplier_id):
 @login_required
 @admin_or_manager_or_staff_required
 def purchase_orders_list(request):
-    search_query = request.GET.get('search', '')
-    orders = PurchaseOrder.objects.all().order_by('-order_date')
+    search_query = request.GET.get("search", "")
+    orders = PurchaseOrder.objects.all().order_by("-order_date")
 
     if search_query:
         orders = orders.filter(
-            Q(supplier__name__icontains=search_query) |  # Searching by supplier's name
-            Q(supplier__contact_name__icontains=search_query)  # Searching by supplier's contact name
+            Q(supplier__name__icontains=search_query)  # Searching by supplier's name
+            | Q(
+                supplier__contact_name__icontains=search_query
+            )  # Searching by supplier's contact name
         )
 
     paginator = Paginator(orders, 25)
-    page_number = request.GET.get('page')
+    page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
 
     table_title = "Purchase Orders List"
 
     return render(
         request,
-        'supplier/purchase_orders_list.html',
+        "supplier/purchase_orders_list.html",
         {
-            'orders': page_obj,
-            'table_title': table_title,
-            'page_obj': page_obj,
-            'search_query': search_query,
-        }
+            "orders": page_obj,
+            "table_title": table_title,
+            "page_obj": page_obj,
+            "search_query": search_query,
+        },
     )
 
 
@@ -170,21 +174,23 @@ def purchase_orders_list(request):
 
 
 def purchase_order_add(request):
-    ItemFormSet = modelformset_factory(PurchaseOrderItem, form=PurchaseOrderItemForm, extra=1, can_delete=True)
-    
-    if request.method == 'POST':
+    ItemFormSet = modelformset_factory(
+        PurchaseOrderItem, form=PurchaseOrderItemForm, extra=1, can_delete=True
+    )
+
+    if request.method == "POST":
         form = PurchaseOrderForm(request.POST)
         formset = ItemFormSet(request.POST, request.FILES)
-        
+
         if form.is_valid() and formset.is_valid():
             purchase_order = form.save()
             for form in formset:
-                if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
+                if form.cleaned_data and not form.cleaned_data.get("DELETE", False):
                     item = form.save(commit=False)
                     item.purchase_order = purchase_order
                     item.save()
             messages.success(request, "Purchase order created successfully.")
-            return redirect('supplier:purchase-orders-list')
+            return redirect("supplier:purchase-orders-list")
         else:
             # Debug form errors
             messages.error(request, "Please correct the errors below.")
@@ -193,12 +199,16 @@ def purchase_order_add(request):
     else:
         form = PurchaseOrderForm()
         formset = ItemFormSet(queryset=PurchaseOrderItem.objects.none())
-    
-    return render(request, 'supplier/purchase_order_add.html', {
-        'form': form,
-        'formset': formset,
-        'form_title': 'Create New Purchase Order',
-    })
+
+    return render(
+        request,
+        "supplier/purchase_order_add.html",
+        {
+            "form": form,
+            "formset": formset,
+            "form_title": "Create New Purchase Order",
+        },
+    )
 
 
 # =================================== purchase_order_create ===================================
@@ -212,17 +222,15 @@ def purchase_order_update(request, purchase_order_id):
     if request.method == "POST" and form.is_valid():
         with transaction.atomic():
             form.save()
-            messages.success(request, "Purchase Order updated successfully!", extra_tags="bg-success")
+            messages.success(
+                request, "Purchase Order updated successfully!", extra_tags="bg-success"
+            )
             return redirect("supplier:purchase-orders-list")
 
     return render(
         request,
-        'supplier/purchase_order_update.html',
-        {
-            'purchase_order': purchase_order,
-            'form': form,
-            'form_title': form_title
-        }
+        "supplier/purchase_order_update.html",
+        {"purchase_order": purchase_order, "form": form, "form_title": form_title},
     )
 
 
@@ -234,30 +242,35 @@ def purchase_order_delete(request, purchase_order_id):
 
     if request.method == "POST":
         purchase_order.delete()
-        messages.success(request, "Purchase Order deleted successfully!", extra_tags="bg-success")
+        messages.success(
+            request, "Purchase Order deleted successfully!", extra_tags="bg-success"
+        )
         return redirect("supplier:purchase-orders-list")
 
-    return redirect('supplier:purchase-orders-list')
+    return redirect("supplier:purchase-orders-list")
 
 
 # =================================== purchase_order_detail_delete ===================================
 def purchase_order_detail(request, pk):
     order = get_object_or_404(PurchaseOrder, pk=pk)
     items = order.items.all()  # Related PurchaseOrderItem objects
-    return render(request, 'supplier/purchase_order_detail.html', {
-        'order': order,
-        'items': items
-    })
+    return render(
+        request, "supplier/purchase_order_detail.html", {"order": order, "items": items}
+    )
 
 
 @require_POST
 def purchase_order_update_status(request, pk):
     order = get_object_or_404(PurchaseOrder, pk=pk)
-    new_status = request.POST.get('status')
+    new_status = request.POST.get("status")
     if new_status in dict(PurchaseOrder.STATUS_CHOICES).keys():
         order.status = new_status
         order.save()
-        messages.success(request, f"Status for Order #{order.id} updated successfully.", extra_tags="bg-success")
+        messages.success(
+            request,
+            f"Status for Order #{order.id} updated successfully.",
+            extra_tags="bg-success",
+        )
     else:
         messages.error(request, "Invalid status selected.")
-    return redirect('supplier:purchase-orders-list')
+    return redirect("supplier:purchase-orders-list")

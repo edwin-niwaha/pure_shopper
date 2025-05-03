@@ -17,7 +17,6 @@ from django.utils import timezone
 from django.db import transaction
 from .models import Cart, CartItem, Order, OrderDetail, Wishlist
 from apps.products.models import Product, ProductImage
-from django.core.exceptions import MultipleObjectsReturned
 from .forms import CheckoutForm, OrderStatusForm
 from apps.customers.models import Customer
 from apps.products.models import Review
@@ -121,7 +120,8 @@ def product_details_view(request, id):
             "description": product.description,
             "category": product.category.name if product.category else "N/A",
             "price": product.price,  # Using product's price directly
-            "discount_value": product.discount_value or 0,  # Assuming discount_value is on the product
+            "discount_value": product.discount_value
+            or 0,  # Assuming discount_value is on the product
             "discounted_price": product.get_discounted_price(),  # Get the discounted price if available
         }
 
@@ -232,9 +232,7 @@ def add_to_cart(request, product_id):
         )
         return redirect("orders:product_detail", id=product_id)
 
-    cart_item, created = CartItem.objects.get_or_create(
-        cart=cart, product=product
-    )
+    cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
 
     if not created:
         cart_item.quantity += quantity
@@ -315,8 +313,12 @@ def send_order_email(
     total_price,
     is_customer=True,
 ):
-    customer_order_history_url = "https://pure_shopper.up.railway.app/orders/order-history/"
-    orders_to_be_processed_url = "https://pure_shopper.up.railway.app/orders/to-be-processed/"
+    customer_order_history_url = (
+        "https://pure_shopper.up.railway.app/orders/order-history/"
+    )
+    orders_to_be_processed_url = (
+        "https://pure_shopper.up.railway.app/orders/to-be-processed/"
+    )
     subject = "Your Order has been Placed" if is_customer else "New Order to Process"
 
     if is_customer:
@@ -441,8 +443,14 @@ def checkout_view(request):
                 #     product.image.url if product.image else ""
                 # )
                 # Get the first associated image for the product
-                product_image = product.images.first()  # Assuming you want the first image
-                image_url = product_image.image.url if product_image and product_image.image else ""
+                product_image = (
+                    product.images.first()
+                )  # Assuming you want the first image
+                image_url = (
+                    product_image.image.url
+                    if product_image and product_image.image
+                    else ""
+                )
 
                 order_details.append(
                     {
@@ -507,6 +515,7 @@ def checkout_view(request):
         "orders/checkout.html",
         {"form": form, "cart": cart, "total_price": total_price},
     )
+
 
 # =================================== process_payment ===================================
 @login_required
@@ -775,6 +784,7 @@ def order_report_view(request, order_id):
         print(detail.product.name, detail.quantity, detail.price)
 
     return render(request, "orders/order_report.html", {"order": order})
+
 
 # =================================== order_detail_view ===================================
 

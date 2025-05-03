@@ -1,6 +1,6 @@
 # forms.py
 from django import forms
-from .models import Supplier,  PurchaseOrder, PurchaseOrderItem
+from .models import Supplier, PurchaseOrder, PurchaseOrderItem
 
 
 class SupplierForm(forms.ModelForm):
@@ -33,18 +33,19 @@ class SupplierForm(forms.ModelForm):
 class PurchaseOrderForm(forms.ModelForm):
     class Meta:
         model = PurchaseOrder
-        fields = ['supplier', 'status', 'notes']
+        fields = ["supplier", "status", "notes"]
         widgets = {
-            'supplier': forms.Select(attrs={'class': 'form-control'}),
-            'status': forms.Select(attrs={'class': 'form-control'}),
-            'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            "supplier": forms.Select(attrs={"class": "form-control"}),
+            "status": forms.Select(attrs={"class": "form-control"}),
+            "notes": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
         }
+
 
 class PurchaseOrderItemForm(forms.ModelForm):
     class Meta:
         model = PurchaseOrderItem
-        fields = ['product', 'quantity']
+        fields = ["product", "quantity"]
         widgets = {
-            'unit_price': forms.NumberInput(attrs={'step': '0.01'}),
-            'quantity': forms.NumberInput(attrs={'min': '1'}),
+            "unit_price": forms.NumberInput(attrs={"step": "0.01"}),
+            "quantity": forms.NumberInput(attrs={"min": "1"}),
         }

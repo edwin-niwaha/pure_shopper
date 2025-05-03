@@ -660,10 +660,10 @@ def balance_sheet_view(request):
 
     # Calculate Cost of Goods Sold (COGS) with discounts considered for prices
     cogs = (
-        sales_details.annotate(cost_price=F("product__cost"))
-        .aggregate(total_cogs=Sum(F("cost_price") * F("quantity")))
+        sales_details.annotate(cost_price=F("product__cost")).aggregate(
+            total_cogs=Sum(F("cost_price") * F("quantity"))
+        )
     )["total_cogs"] or 0
-
 
     # Calculate Gross Profit (Sales Revenue - COGS)
     gross_profit = sales_revenue - cogs

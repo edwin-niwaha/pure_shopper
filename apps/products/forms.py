@@ -1,10 +1,10 @@
 from django import forms
-from django.core.exceptions import ValidationError
 from .models import (
     Category,
     Product,
     ProductImage,
-    Review,)
+    Review,
+)
 from apps.inventory.models import Inventory
 
 
@@ -96,9 +96,6 @@ class InventoryForm(forms.ModelForm):
 
 
 # =================================== product form ===================================
-from django import forms
-from .models import Product
-
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
@@ -114,15 +111,27 @@ class ProductForm(forms.ModelForm):
             "expiring_date",
         ]
         widgets = {
-            "name": forms.TextInput(attrs={"class": "form-control", "placeholder": "Enter product name"}),
-            "description": forms.Textarea(attrs={"class": "form-control", "placeholder": "Enter product description", "rows": 3}),
+            "name": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "Enter product name"}
+            ),
+            "description": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Enter product description",
+                    "rows": 3,
+                }
+            ),
             "status": forms.Select(attrs={"class": "form-control"}),
             "category": forms.Select(attrs={"class": "form-control"}),
             "supplier": forms.Select(attrs={"class": "form-control"}),
             "cost": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
             "price": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
-            "discount_value": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
-            "expiring_date": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
+            "discount_value": forms.NumberInput(
+                attrs={"class": "form-control", "step": "0.01"}
+            ),
+            "expiring_date": forms.DateInput(
+                attrs={"class": "form-control", "type": "date"}
+            ),
         }
         labels = {
             "name": "Product Name",
@@ -158,7 +167,6 @@ class ProductImageForm(forms.ModelForm):
         if picture and picture.size > 1500 * 1024:  # 1.5 MB
             raise forms.ValidationError("Image size should not exceed 1.5 MB.")
         return picture
-
 
 
 # =================================== Product Review Form ===================================

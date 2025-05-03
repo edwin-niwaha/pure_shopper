@@ -17,30 +17,92 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Contact',
+            name="Contact",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=100, verbose_name='Your Name')),
-                ('email', models.EmailField(max_length=254, verbose_name='Your Email')),
-                ('message', models.TextField(verbose_name='Message')),
-                ('is_valid', models.BooleanField(default=False, verbose_name='Valid?')),
-                ('created_at', models.DateTimeField(auto_now_add=True, verbose_name='Created At')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100, verbose_name="Your Name")),
+                ("email", models.EmailField(max_length=254, verbose_name="Your Email")),
+                ("message", models.TextField(verbose_name="Message")),
+                ("is_valid", models.BooleanField(default=False, verbose_name="Valid?")),
+                (
+                    "created_at",
+                    models.DateTimeField(auto_now_add=True, verbose_name="Created At"),
+                ),
             ],
             options={
-                'verbose_name': 'User Feedback',
-                'db_table': 'client_feedback',
+                "verbose_name": "User Feedback",
+                "db_table": "client_feedback",
             },
         ),
         migrations.CreateModel(
-            name='Profile',
+            name="Profile",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('role', models.CharField(choices=[('administrator', 'Administrator'), ('manager', 'Manager'), ('staff', 'Staff'), ('guest', 'Guest')], default='guest', max_length=15)),
-                ('avatar', cloudinary.models.CloudinaryField(default='default.jpg', max_length=255, verbose_name='avatar')),
-                ('bio', models.TextField()),
-                ('tel', phonenumber_field.modelfields.PhoneNumberField(blank=True, default='+12125552368', max_length=16, null=True, region=None, verbose_name='Telephone')),
-                ('mobile', phonenumber_field.modelfields.PhoneNumberField(blank=True, default='+12125552368', max_length=16, null=True, region=None, verbose_name='Mobile')),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "role",
+                    models.CharField(
+                        choices=[
+                            ("administrator", "Administrator"),
+                            ("manager", "Manager"),
+                            ("staff", "Staff"),
+                            ("guest", "Guest"),
+                        ],
+                        default="guest",
+                        max_length=15,
+                    ),
+                ),
+                (
+                    "avatar",
+                    cloudinary.models.CloudinaryField(
+                        default="default.jpg", max_length=255, verbose_name="avatar"
+                    ),
+                ),
+                ("bio", models.TextField()),
+                (
+                    "tel",
+                    phonenumber_field.modelfields.PhoneNumberField(
+                        blank=True,
+                        default="+12125552368",
+                        max_length=16,
+                        null=True,
+                        region=None,
+                        verbose_name="Telephone",
+                    ),
+                ),
+                (
+                    "mobile",
+                    phonenumber_field.modelfields.PhoneNumberField(
+                        blank=True,
+                        default="+12125552368",
+                        max_length=16,
+                        null=True,
+                        region=None,
+                        verbose_name="Mobile",
+                    ),
+                ),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
         ),
     ]

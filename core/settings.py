@@ -2,7 +2,6 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-import dj_database_url
 
 # Load environment variables from .env file
 load_dotenv()
@@ -25,7 +24,11 @@ SITE_URL = f"https://{BASE_DOMAIN}"
 
 # Allowed hosts and trusted origins
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", BASE_DOMAIN]
-CSRF_TRUSTED_ORIGINS = [f"https://{BASE_DOMAIN}", "http://localhost", "http://127.0.0.1"]
+CSRF_TRUSTED_ORIGINS = [
+    f"https://{BASE_DOMAIN}",
+    "http://localhost",
+    "http://127.0.0.1",
+]
 
 # CORS configuration
 CORS_ALLOWED_ORIGINS = [f"https://{BASE_DOMAIN}"]

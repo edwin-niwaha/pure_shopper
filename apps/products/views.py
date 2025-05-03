@@ -1,7 +1,6 @@
 from django.contrib import messages
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
-from django.db import IntegrityError
-from django.db.models import Sum, F, Q, Min, Max
+from django.db.models import F, Q
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.urls import reverse
@@ -258,7 +257,7 @@ def products_list_all(request):
 
     # Calculate total quantity, cost, and price directly from Product model
     total_quantity = sum(product.inventory.quantity for product in products)
-    total_cost = sum(product.cost for product in products) 
+    total_cost = sum(product.cost for product in products)
     total_price = sum(product.price for product in products)
 
     context = {
@@ -270,7 +269,6 @@ def products_list_all(request):
     }
 
     return render(request, "products/products_list_all.html", context)
-
 
 
 # =================================== produts list view ===================================
@@ -303,7 +301,7 @@ def products_list_view(request):
     # Calculate totals using product attributes directly
     # Calculate total quantity, cost, and price directly from Product model
 
-    total_cost = sum(product.cost for product in products) 
+    total_cost = sum(product.cost for product in products)
     total_price = sum(product.price for product in products)
 
     total_stock = sum(
@@ -338,9 +336,9 @@ def products_add_view(request):
             attributes = form.cleaned_data
 
             existing_product = Product.objects.filter(
-                name=attributes['name'],
-                category=attributes.get('category'),
-                supplier=attributes.get('supplier'),
+                name=attributes["name"],
+                category=attributes.get("category"),
+                supplier=attributes.get("supplier"),
             ).first()
 
             if existing_product:
@@ -588,13 +586,21 @@ def delete_product_image(request, pk):
 @admin_or_manager_or_staff_required
 def discounted_product_list_view(request):
     # Fetch products with at least one discounted value
-    discounted_products = Product.objects.filter(
-        discount_value__gt=0  # Products with a discount value greater than 0
-    ).distinct().order_by("name")
+    discounted_products = (
+        Product.objects.filter(
+            discount_value__gt=0  # Products with a discount value greater than 0
+        )
+        .distinct()
+        .order_by("name")
+    )
 
     # Paginate the discounted products (12 items per page)
-    paginator = Paginator(discounted_products, 12)  # Show 12 discounted products per page
-    page_number = request.GET.get("page")  # Get the current page number from the request
+    paginator = Paginator(
+        discounted_products, 12
+    )  # Show 12 discounted products per page
+    page_number = request.GET.get(
+        "page"
+    )  # Get the current page number from the request
     page_obj = paginator.get_page(page_number)  # Get the page object
 
     # Fetch the default image and discounted prices for each discounted product
@@ -611,4 +617,3 @@ def discounted_product_list_view(request):
         "page_obj": page_obj,
     }
     return render(request, "products/discounted_products.html", context)
-

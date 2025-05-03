@@ -34,6 +34,7 @@ class Cart(models.Model):
         self.items.all().delete()  # Clear the cart after checkout
         return order
 
+
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, related_name="items", on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
@@ -54,6 +55,7 @@ class CartItem(models.Model):
             discounted_price = self.product.price
 
         return discounted_price * self.quantity
+
 
 class Order(models.Model):
     ORDER_STATUS_CHOICES = [
@@ -133,6 +135,7 @@ class OrderDetail(models.Model):
             self.discounted_price = self.product.get_discounted_price()
 
         super().save(*args, **kwargs)
+
 
 class Wishlist(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

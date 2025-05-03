@@ -2,7 +2,7 @@ import json
 import logging
 from decimal import Decimal
 from django.core.paginator import Paginator
-from django.db.models import  Count, Q, Sum, F, ExpressionWrapper, DecimalField
+from django.db.models import Count, Sum, F, ExpressionWrapper, DecimalField
 from django.db import transaction
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 # =================================== Sale list view ===================================
+
 
 @login_required
 @admin_or_manager_or_staff_required
@@ -69,8 +70,8 @@ def sales_list_view(request):
     return render(request, "sales/sales.html", context)
 
 
-
 # =================================== sales_report_view view ===================================
+
 
 def sales_report_view(request):
     # Initialize the form with GET data
@@ -119,7 +120,7 @@ def sales_report_view(request):
         for item in sale.items.all():
             product = item.product
             # Get the original price from the ProductVolume (before discount)
-            original_price = (product.price)
+            original_price = product.price
 
             # Apply discount if exists (use price from SaleDetail)
             discounted_price = item.price  # Use the price from SaleDetail directly
@@ -136,9 +137,7 @@ def sales_report_view(request):
                     "product": product.name,
                     "original_price": original_price,  # Add original price
                     "price": discounted_price,  # Use price from SaleDetail
-                    "cost": (
-                        product.cost if product else 0
-                    ),
+                    "cost": (product.cost if product else 0),
                     "quantity": item.quantity,
                     "total": item.total_detail,
                 }
@@ -182,8 +181,7 @@ def sales_report_view(request):
 def sales_add_view(request):
     # Fetch only active products with their inventory
     products = Product.objects.filter(
-        status="ACTIVE",
-        inventory__quantity__gt=0
+        status="ACTIVE", inventory__quantity__gt=0
     ).select_related("inventory")
 
     context = {
@@ -289,7 +287,6 @@ def sales_details_view(request, sale_id):
     }
 
     return render(request, "sales/sales_details.html", context=context)
-
 
 
 # =================================== Sale delete view ===================================

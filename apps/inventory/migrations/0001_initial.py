@@ -9,18 +9,46 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('products', '0001_initial'),
+        ("products", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Inventory',
+            name="Inventory",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('quantity', models.PositiveIntegerField(default=0, verbose_name='Stock Quantity')),
-                ('low_stock_threshold', models.PositiveIntegerField(default=5, verbose_name='Low Stock Threshold')),
-                ('is_out_of_stock', models.BooleanField(default=False, verbose_name='Out of Stock')),
-                ('product', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='inventory', to='products.product')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "quantity",
+                    models.PositiveIntegerField(
+                        default=0, verbose_name="Stock Quantity"
+                    ),
+                ),
+                (
+                    "low_stock_threshold",
+                    models.PositiveIntegerField(
+                        default=5, verbose_name="Low Stock Threshold"
+                    ),
+                ),
+                (
+                    "is_out_of_stock",
+                    models.BooleanField(default=False, verbose_name="Out of Stock"),
+                ),
+                (
+                    "product",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="inventory",
+                        to="products.product",
+                    ),
+                ),
             ],
         ),
     ]

@@ -42,18 +42,11 @@ class Category(models.Model):
 
 
 class Product(models.Model):
-    name = models.CharField(
-        max_length=256,
-        verbose_name="Product Name"
-    )
+    name = models.CharField(max_length=256, verbose_name="Product Name")
     sku = models.CharField(max_length=100, unique=True, verbose_name="SKU", blank=True)
-    description = models.TextField(
-        verbose_name="Product Description"
-    )
+    description = models.TextField(verbose_name="Product Description")
     status = models.CharField(
-        max_length=10,
-        choices=STATUS_CHOICES,
-        verbose_name="Status"
+        max_length=10, choices=STATUS_CHOICES, verbose_name="Status"
     )
     category = models.ForeignKey(
         Category,
@@ -61,7 +54,7 @@ class Product(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        verbose_name="Category"
+        verbose_name="Category",
     )
     supplier = models.ForeignKey(
         Supplier,
@@ -69,43 +62,28 @@ class Product(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        verbose_name="Supplier"
+        verbose_name="Supplier",
     )
     cost = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        verbose_name="Cost Price"
+        max_digits=10, decimal_places=2, verbose_name="Cost Price"
     )
     price = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        verbose_name="Selling Price"
+        max_digits=10, decimal_places=2, verbose_name="Selling Price"
     )
     discount_value = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         null=True,
         blank=True,
-        verbose_name="Discount Value"
+        verbose_name="Discount Value",
     )
 
-    is_featured = models.BooleanField(
-        default=False,
-        verbose_name="Is Featured"
-    )
+    is_featured = models.BooleanField(default=False, verbose_name="Is Featured")
     expiring_date = models.DateTimeField(
-        null=True,
-        blank=True,
-        verbose_name="Expiring Date"
+        null=True, blank=True, verbose_name="Expiring Date"
     )
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name="Created At"
-    )
-    updated_at = models.DateTimeField(
-        auto_now=True,
-        verbose_name="Updated At"
-    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created At")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Updated At")
 
     class Meta:
         db_table = "product"
@@ -151,14 +129,15 @@ class Product(models.Model):
     def clean(self):
         # Check if expiring_date is provided and is behind today's date
         if self.expiring_date and self.expiring_date < timezone.now():
-            raise ValidationError({"expiring_date": "The expiring date cannot be in the past or today."})
+            raise ValidationError(
+                {"expiring_date": "The expiring date cannot be in the past or today."}
+            )
 
         super().clean()
 
-
     def save(self, *args, **kwargs):
         if not self.sku:
-            self.sku = str(uuid.uuid4()).split('-')[0].upper()  # e.g., 'F3D9A7'
+            self.sku = str(uuid.uuid4()).split("-")[0].upper()  # e.g., 'F3D9A7'
         super().save(*args, **kwargs)
 
 
@@ -201,20 +180,12 @@ class ProductImage(models.Model):
                 raise ValidationError("Only one default image can be set per product.")
 
     def save(self, *args, **kwargs):
-        # Ensure no other images are marked as default if this one is set as default
-        if self.is_default:
-            ProductImage.objects.filter(product=self.product, is_default=True).update(
-                is_default=False
-            )
-
-        super().save(*args, **kwargs)
-
-    def save(self, *args, **kwargs):
         if self.image and not str(self.image).startswith("http"):
             upload_result = cloudinary.uploader.upload(
                 self.image.file, folder="pure_shopper_product_images"
             )
             self.image = upload_result["url"]
+
         super().save(*args, **kwargs)
 
 

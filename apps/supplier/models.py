@@ -4,10 +4,7 @@ from django.utils import timezone
 from django.core.exceptions import ValidationError
 from phonenumber_field.modelfields import PhoneNumberField
 import phonenumbers
-from django.core.mail import EmailMultiAlternatives
-from django.utils.html import strip_tags
 
-from django.conf import settings
 import logging
 
 
@@ -24,7 +21,7 @@ class Supplier(models.Model):
     address = models.CharField(max_length=255, verbose_name="Address")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created at")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Updated at")
-    
+
     def __str__(self):
         return self.name
 
@@ -53,14 +50,14 @@ class Supplier(models.Model):
 
 class PurchaseOrder(models.Model):
     STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('received', 'Received'),
-        ('cancelled', 'Cancelled'),
+        ("pending", "Pending"),
+        ("received", "Received"),
+        ("cancelled", "Cancelled"),
     ]
 
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE)
     order_date = models.DateField(default=timezone.now)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created at")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Updated at")
@@ -73,19 +70,20 @@ class PurchaseOrder(models.Model):
 
     @property
     def aggregate_total_quantity(self):
-        return self.items.aggregate(total=Sum('quantity'))['total'] or 0
+        return self.items.aggregate(total=Sum("quantity"))["total"] or 0
 
-            
     class Meta:
-        db_table = 'purchase_order'
-        verbose_name = 'Purchase Order'
-        verbose_name_plural = 'Purchase Orders'
-        ordering = ['-created_at']
+        db_table = "purchase_order"
+        verbose_name = "Purchase Order"
+        verbose_name_plural = "Purchase Orders"
+        ordering = ["-created_at"]
 
 
 class PurchaseOrderItem(models.Model):
-    purchase_order = models.ForeignKey(PurchaseOrder, related_name='items', on_delete=models.CASCADE)
-    product = models.ForeignKey('products.Product', on_delete=models.PROTECT)
+    purchase_order = models.ForeignKey(
+        PurchaseOrder, related_name="items", on_delete=models.CASCADE
+    )
+    product = models.ForeignKey("products.Product", on_delete=models.PROTECT)
     quantity = models.PositiveIntegerField()
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created at")
@@ -101,9 +99,9 @@ class PurchaseOrderItem(models.Model):
         if not self.unit_price:
             self.unit_price = self.product.cost
         super().save(*args, **kwargs)
-        
+
     class Meta:
-        db_table = 'purchase_order_item'
-        verbose_name = 'Purchase Order Item'
-        verbose_name_plural = 'Purchase Order Items'
-        ordering = ['-created_at']
+        db_table = "purchase_order_item"
+        verbose_name = "Purchase Order Item"
+        verbose_name_plural = "Purchase Order Items"
+        ordering = ["-created_at"]

@@ -41,6 +41,7 @@ logger = logging.getLogger(__name__)
 
 # =================================== Register User  ===================================
 
+
 class RegisterView(View):
     form_class = RegisterForm
     initial = {"key": "value"}
