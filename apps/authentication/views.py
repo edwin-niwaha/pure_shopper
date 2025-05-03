@@ -235,7 +235,7 @@ def send_contact_email(name, email):
         "Your message has been received, and our team is already on it. "
         "Expect a response soon as we work to assist you promptly.\n\n"
         "In the meantime, feel free to browse our available products here:\n"
-        "👉 [View Products](https://pure_shopper.up.railway.app/)\n\n"
+        "👉 [View Products](https://pureshopper-production.up.railway.app/)\n\n"
         "If you have additional questions or concerns, let us know—we're here to help!\n\n"
         "Warm regards,\n"
         "The Perpetual Team\n"

@@ -20,7 +20,7 @@ DEBUG = os.getenv("DEBUG", "False") == "True"
 
 # Site configuration
 SITE_NAME = "Stock Track"
-BASE_DOMAIN = "pure_shopper.up.railway.app"
+BASE_DOMAIN = "pureshopper-production.up.railway.app"
 SITE_URL = f"https://{BASE_DOMAIN}"
 
 # Allowed hosts and trusted origins
