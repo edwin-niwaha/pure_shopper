@@ -133,8 +133,6 @@ WSGI_APPLICATION = "core.wsgi.application"
 
 # =================================== DATABASE CONFIGURATIONS ===================================
 
-############################### LOCAL DATABASE CONFIGURATION ###############################
-
 # DATABASES = {
 #     "default": {
 #         "ENGINE": "django.db.backends.postgresql",

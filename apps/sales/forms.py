@@ -3,7 +3,6 @@ from .models import Sale, SaleDetail
 from datetime import date
 
 
-
 # =================================== Sale Form ===================================
 class SaleForm(forms.ModelForm):
     class Meta:
@@ -43,11 +42,12 @@ class SaleForm(forms.ModelForm):
         }
 
     def clean_trans_date(self):
-        trans_date = self.cleaned_data.get('trans_date')
+        trans_date = self.cleaned_data.get("trans_date")
         if trans_date and trans_date > date.today():
             raise forms.ValidationError("Receipt date cannot be in the future.")
         return trans_date
-    
+
+
 # =================================== Sale Detail Form ===================================
 class SaleDetailForm(forms.ModelForm):
     class Meta:

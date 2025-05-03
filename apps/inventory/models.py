@@ -14,7 +14,6 @@ class Inventory(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created at")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Updated at")
 
-
     def check_stock_alerts(self):
         """Check stock levels and update stock status."""
         self.is_out_of_stock = self.quantity <= 0

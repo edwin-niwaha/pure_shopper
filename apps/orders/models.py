@@ -12,7 +12,6 @@ class Cart(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created at")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Updated at")
 
-
     def __str__(self):
         return f"Cart of {self.user.username}"
 
@@ -43,7 +42,6 @@ class CartItem(models.Model):
     quantity = models.PositiveIntegerField(default=1)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created at")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Updated at")
-
 
     def __str__(self):
         return f"{self.product.name} (x{self.quantity})"
@@ -98,7 +96,6 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created at")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Updated at")
 
-
     def __str__(self):
         # Use customer full name regardless of online or offline
         return f"Order {self.id} by {self.customer.full_name()}"
@@ -150,7 +147,6 @@ class Wishlist(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     added_at = models.DateTimeField(auto_now_add=True, verbose_name="Added at")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Updated at")
-
 
     class Meta:
         unique_together = (
