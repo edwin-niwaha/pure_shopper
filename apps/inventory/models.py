@@ -11,6 +11,9 @@ class Inventory(models.Model):
         default=5, verbose_name="Low Stock Threshold"
     )
     is_out_of_stock = models.BooleanField(default=False, verbose_name="Out of Stock")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created at")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Updated at")
+
 
     def check_stock_alerts(self):
         """Check stock levels and update stock status."""

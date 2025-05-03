@@ -9,7 +9,9 @@ from django.utils.functional import cached_property
 
 class Cart(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created at")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Updated at")
+
 
     def __str__(self):
         return f"Cart of {self.user.username}"
@@ -39,6 +41,9 @@ class CartItem(models.Model):
     cart = models.ForeignKey(Cart, related_name="items", on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created at")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Updated at")
+
 
     def __str__(self):
         return f"{self.product.name} (x{self.quantity})"
@@ -90,6 +95,9 @@ class Order(models.Model):
         max_length=20, choices=PAYMENT_STATUS_CHOICES, default="pending"
     )
     external_id = models.CharField(max_length=100, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created at")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Updated at")
+
 
     def __str__(self):
         # Use customer full name regardless of online or offline
@@ -140,7 +148,9 @@ class OrderDetail(models.Model):
 class Wishlist(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    added_at = models.DateTimeField(auto_now_add=True)
+    added_at = models.DateTimeField(auto_now_add=True, verbose_name="Added at")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Updated at")
+
 
     class Meta:
         unique_together = (
