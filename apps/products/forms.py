@@ -101,7 +101,6 @@ class ProductForm(forms.ModelForm):
         model = Product
         fields = [
             "name",
-            "description",
             "status",
             "category",
             "supplier",
@@ -113,13 +112,6 @@ class ProductForm(forms.ModelForm):
         widgets = {
             "name": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "Enter product name"}
-            ),
-            "description": forms.Textarea(
-                attrs={
-                    "class": "form-control",
-                    "placeholder": "Enter product description",
-                    "rows": 3,
-                }
             ),
             "status": forms.Select(attrs={"class": "form-control"}),
             "category": forms.Select(attrs={"class": "form-control"}),
@@ -135,7 +127,6 @@ class ProductForm(forms.ModelForm):
         }
         labels = {
             "name": "Product Name",
-            "description": "Description",
             "status": "Status",
             "category": "Category",
             "supplier": "Supplier",

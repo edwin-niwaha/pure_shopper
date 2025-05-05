@@ -44,7 +44,6 @@ class Category(models.Model):
 class Product(models.Model):
     name = models.CharField(max_length=256, verbose_name="Product Name")
     sku = models.CharField(max_length=100, unique=True, verbose_name="SKU", blank=True)
-    description = models.TextField(verbose_name="Product Description")
     status = models.CharField(
         max_length=10, choices=STATUS_CHOICES, verbose_name="Status"
     )
@@ -83,7 +82,7 @@ class Product(models.Model):
         null=True, blank=True, verbose_name="Expiring Date"
     )
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Created At")
-    # updated_at = models.DateTimeField(auto_now=True, verbose_name="Updated At")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Updated At")
 
     class Meta:
         db_table = "product"
